@@ -2,7 +2,7 @@
 (function() {
 
   Backbone.Wreqr.radio.reqres.setHandler('global', 'authorized', function() {
-    return true;
+    return false;
   });
 
   // Get our gistbook

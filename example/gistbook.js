@@ -5,21 +5,15 @@
 
     blocks: [
       {
-        type: 'math',
-        source: 'x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}.'
-      },
-      {
-        type: 'math',
-        source: 'asdasf'
+        type: 'text',
+        source: '## Pythagorean Theorem\n\nThe pythagorean theorem calculates the hypotenuse of a triangle.\n\n'+
+        '$$x = {-b \\pm \\sqrt{b^2-4ac} \\over 2a}.$$\n\n'+
+        'It can be calculated in Javascript with a simple function.'
       },
       {
         type: 'javascript',
-        source: 'var x = true;\nvar obj = {\n  name: "james",\n  affil: true\n};'
+        source: 'var norm = function(a, b) {\n  var obj = {\n  name: "james",\n  affil: true\n};'
       },
-      {
-        type: 'markdown',
-        source: '## hello\nJames ~~is~~ is not `cool`\n\n```\nvar a = true;\n```\nThis is **bold**, this is *italic*, this _too_'
-      }
     ],
     resources: [
       'http://www.whatever.com/marionette.com'

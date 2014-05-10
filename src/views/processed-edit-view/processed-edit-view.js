@@ -10,7 +10,7 @@
 var ProcessedEditView = Marionette.Layout.extend({
   template: gistbookTemplates.processedEditView,
 
-  className: 'gistblock gistblock-active',
+  className: 'processed-edit-view',
 
   defaults: {
     InertView: undefined

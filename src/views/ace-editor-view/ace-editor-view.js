@@ -19,6 +19,7 @@ var AceEditorView = Marionette.ItemView.extend({
     mode: 'javascript',
     minLines: 8,
     maxLines: 20,
+    hideCursor: false,
     showGutter: false
   },
 
@@ -55,6 +56,10 @@ var AceEditorView = Marionette.ItemView.extend({
     session.setTabSize(this.tabSize);
     session.setUseSoftTabs(this.softTabs);
     renderer.setShowGutter(this.showGutter);
+
+    if (this.hideCursor) {
+      renderer.$cursorLayer.element.style.opacity = 0;
+    }
   },
 
   // Create the editor and configure it

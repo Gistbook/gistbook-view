@@ -1,4 +1,5 @@
-.gistblock-markdown {
+.gistblock-markdown,
+.gistblock-text {
 
   a {
     color: #4183C4; }
@@ -19,7 +20,12 @@
     padding: 0;
     font-weight: bold;
     -webkit-font-smoothing: antialiased;
-    position: relative; }
+    position: relative;
+    &:first-child {
+      margin-top 0
+    }
+
+  }
 
   h1:hover a.anchor, h2:hover a.anchor, h3:hover a.anchor, h4:hover a.anchor, h5:hover a.anchor, h6:hover a.anchor {
     background: url("../../images/modules/styleguide/para.png") no-repeat 10px center;
