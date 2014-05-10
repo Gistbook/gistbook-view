@@ -1,6 +1,6 @@
 /*
- * active-math
- * ----------
+ * active-javascript
+ * -----------------
  * A view that lets you edit and execute Javascript
  *
  */

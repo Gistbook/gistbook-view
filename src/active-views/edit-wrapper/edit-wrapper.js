@@ -16,8 +16,10 @@ var EditWrapper = Marionette.Layout.extend({
   defaults: {
     // What the tab says that shows the source
     sourceTabText: 'Code',
+    PreviewView: undefined,
     // Options to pass along to the ace editor
-    aceEditorOptions: {}
+    aceEditorOptions: {},
+    parent: undefined
   },
 
   serializeData: function() {
@@ -43,10 +45,67 @@ var EditWrapper = Marionette.Layout.extend({
     'click @ui.update':  'update'
   },
 
-  // Store our options on the object itself
+  // On preview, update the cache with the changes in the Ace Editor
+  // Then, show the preview state
+  onPreview: function() {
+    if (this.mode === 'preview') {
+      return;
+    }
+    this.mode = 'preview';
+    this.transitionUiToPreview();
+    this.parent._updateCache();
+    this.showPreview();
+  },
+
+  onCode: function() {
+    if (this.mode === 'code') {
+      return;
+    }
+    this.mode = 'code';
+    this.transitionUiToCode();
+    this.showEditor();
+  },
+
+  transitionUiToPreview: function() {
+    this.ui.code.removeClass('active-tab');
+    this.ui.preview.addClass('active-tab');
+  },
+
+  transitionUiToCode: function() {
+    this.ui.preview.removeClass('active-tab');
+    this.ui.code.addClass('active-tab');
+  },
+
+  getAceEditorView: function() {
+    var aceOptions = _.extend(this.aceEditorOptions, {model: this.model});
+    return new AceEditorView(aceOptions);
+  },
+
+  // Show the Ace Editor in our region
+  showEditor: function() {
+    var aceEditorView = this.getAceEditorView();
+    var region = this.getRegion('content');
+    region.show(aceEditorView);
+    this.editor = region.currentView.editor;
+  },
+
+  // The preview is just an inert math view
+  showPreview: function() {
+    this.editor.destroy();
+    var region = this.getRegion('content');
+    delete this.editor;
+    region.show(new this.PreviewView({
+      model: this.model
+    }));
+  },
+
+  // Store our options on the object itself.
+  // Also set the initial mode to be code.
   initialize: function(options) {
     var validOptions = _.keys(this.defaults)
     _.extend(this, this.defaults, _.pick(options, validOptions));
+
+    this.mode = 'code';
   },
 
   // Where to render the inert view
@@ -54,12 +113,11 @@ var EditWrapper = Marionette.Layout.extend({
     content: '.gistblock-content'
   },
 
-  // Show the inert view after rendering
+  // Show the editor view on the first render
   onRender: function() {
     this._showMenu();
-    var region = this.getRegion('content');
-    var options = _.extend(this.aceEditorOptions, {model: this.model});
-    region.show(new AceEditorView(options));
+
+    this.showEditor();
   },
 
   // Show or hide each menu item based on options

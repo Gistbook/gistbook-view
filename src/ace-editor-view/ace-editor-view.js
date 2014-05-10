@@ -17,6 +17,8 @@ var AceEditorView = Marionette.ItemView.extend({
     highlightActiveLine: false,
     theme: 'tomorrow',
     mode: 'javascript',
+    minLines: 8,
+    maxLines: 20,
     showGutter: false
   },
 
@@ -38,22 +40,27 @@ var AceEditorView = Marionette.ItemView.extend({
 
   // Configure the editor based on our options
   _configureEditor: function() {
-    // var themePath = this._getThemePath(this.theme);
-    // var modePath  = this._getModePath(this.mode);
-    //
-    // var session = this.editor.getSession();
-    // var renderer = this.editor.renderer;
-    //
-    // this.editor.setHighlightActiveLine(this.highlightActiveLine);
-    // this.editor.getSession().setMode(modePath);
-    // this.editor.setTheme(themePath);
-    // session.setTabSize(this.tabSize);
-    // session.setUseSoftTabs(this.softTabs);
-    // renderer.setShowGutter(this.showGutter);
+    var themePath = this._getThemePath(this.theme);
+    var modePath  = this._getModePath(this.mode);
+
+    var session = this.editor.getSession();
+    var renderer = this.editor.renderer;
+
+    this.editor.setHighlightActiveLine(this.highlightActiveLine);
+    this.editor.getSession().setMode(modePath);
+    this.editor.setTheme(themePath);
+    this.editor.setOption("maxLines", this.maxLines);
+    this.editor.setOption("minLines", this.minLines);
+    this.editor.setReadOnly(this.readOnly);
+    session.setTabSize(this.tabSize);
+    session.setUseSoftTabs(this.softTabs);
+    renderer.setShowGutter(this.showGutter);
   },
 
   // Create the editor and configure it
   onRender: function() {
+    this.$el.height('200px');
+    // console.log('lalala', this.el);
     this.editor = ace.edit(this.el);
     this._configureEditor();
   },

@@ -13,9 +13,11 @@
   // @include active-views/menu-wrapper/menu-wrapper.js
   // @include active-views/edit-wrapper/edit-wrapper.js
 
+  // @include active-views/processed-edit-view/processed-edit-view.js
+
   // @include active-views/active-math/active-math.js
-  // @include active-views/active-markdown.js
-  // @include active-views/active-script.js
+  // @include active-views/active-markdown/active-markdown.js
+  // @include active-views/active-javascript/active-javascript.js
 
   // @include gistbook-view.js
 

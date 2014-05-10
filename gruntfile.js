@@ -13,6 +13,15 @@ module.exports = function(grunt) {
       }
     },
 
+    copy: {
+      fonts: {
+        expand: true,
+        flatten: true,
+        src: 'bower_components/font-awesome/fonts/*',
+        dest: 'fonts'
+      }
+    },
+
     jst: {
       options: {
         namespace: 'gistbookTemplates',
@@ -40,6 +49,6 @@ module.exports = function(grunt) {
 
   });
 
-  grunt.registerTask('default', ['jst', 'preprocess', 'stylus']);
+  grunt.registerTask('default', ['jst', 'copy', 'preprocess', 'stylus']);
 
 };
