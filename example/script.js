@@ -5,20 +5,18 @@
     return false;
   });
 
-  // Get our gistbook
-  var gistbook = window.gistbook;
-
-  var gistblocks = new Backbone.Collection(gistbook.blocks);
-
-  // Get our view
-  var GistbookView = window.GistbookView;
-
   // Set up a region to display the Gistbook within
   var region = new Marionette.Region({
     el: '.gistbook-container'
   });
 
+  // Get our gistbook in Backbone form
+  var gistbook = new Backbone.Model(window.gistbook);
+
+  // Get our view
+  var GistbookView = window.GistbookView;
+
   // Show the gistbook
-  region.show(new GistbookView({collection:gistblocks}));
+  region.show(new GistbookView({model:gistbook}));
 
 })();

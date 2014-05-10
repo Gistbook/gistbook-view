@@ -1,4 +1,16 @@
-var GistbookView = Marionette.CollectionView.extend({
+var GistbookView = Marionette.CompositeView.extend({
+
+  // Create our collection from the gistbook's blocks
+  initialize: function(options) {
+    console.log('options', options);
+    var gistblocks = options.model.get('blocks');
+    this.collection = new Backbone.Collection(gistblocks);
+  },
+
+  template: gistbookTemplates.gistbookView,
+
+  itemViewContainer: '.gistbook-container',
+
   // Never used; just here to prevent errors
   itemView: Marionette.ItemView.extend({
     template: _.template('<div>hi</div>')

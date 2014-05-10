@@ -3,6 +3,8 @@
 
   var gistbook = {
 
+    title: 'Lesson 1: Pythagorean Theorem',
+
     blocks: [
       {
         type: 'text',
