@@ -12,6 +12,8 @@ var EditWrapper = Marionette.Layout.extend({
 
   className: 'gistblock-editor',
 
+  tagName: 'li',
+
   // Default values for options
   defaults: {
     // What the tab says that shows the source

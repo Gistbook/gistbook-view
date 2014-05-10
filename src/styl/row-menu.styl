@@ -1,10 +1,13 @@
+.gistbook-container li:first-child
+  .gistbook-row-controls
+    display none
+
 .gistbook-row-controls
   hr
     position absolute
     top 50%
-    display none
     margin 0
-    border-color #98D0F5
+    border-color #eee
     width 100%
   position relative
   width 100%
@@ -24,7 +27,13 @@
   &:hover ul,
   &:hover hr
     display block
+    border-color #98D0F5
   a
     padding 2px
     i
+      color #fff
+    i.fa-stack-1x
+      position relative
+      top -1px
+    i.fa-stack-2x
       color #30A6F5

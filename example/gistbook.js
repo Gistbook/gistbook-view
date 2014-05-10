@@ -13,9 +13,17 @@
         'It can be calculated in Javascript with a simple function.'
       },
       {
+        type: 'text',
+        source: 'James is here ok'
+      },
+      {
         type: 'javascript',
         source: 'var norm = function(a, b) {\n  var obj = {\n  name: "james",\n  affil: true\n};'
       },
+      {
+        type: 'text',
+        source: 'The Marionette `ItemView` is one cool class'
+      }
     ],
     resources: [
       'http://www.whatever.com/marionette.com'

@@ -1,9 +1,9 @@
 .gistblock-menu
-  padding 15px 0
+  border 1px solid transparent
   position relative
+  padding 15px 0
   &:hover
-    padding 14px 0
-    border 1px solid #98D0F5
+    border 1px dashed #98D0F5
     border-radius 3px
 
 .gistblock-menu > a
@@ -17,6 +17,10 @@
     cursor -webkit-grab
     cursor grab
     left 10px
+    &:active
+      cursor -moz-grabbing
+      cursor -webkit-grabbing
+      cursor grabbing
   &.gistblock-delete
     right 10px
   &.gistblock-edit

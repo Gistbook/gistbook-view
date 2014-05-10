@@ -7,7 +7,7 @@
  */
 
 var AceEditorView = Marionette.ItemView.extend({
-  template: _.template('<%= source %>'),
+  template: _.template('<div class="ace-wrapper"><div class="ace-editor"><%= source %></div></div>'),
 
   // Defaults for the view
   defaults: {
@@ -21,6 +21,10 @@ var AceEditorView = Marionette.ItemView.extend({
     maxLines: 20,
     hideCursor: false,
     showGutter: false
+  },
+
+  ui: {
+    aceContainer: '.ace-editor'
   },
 
   // Merge the options
@@ -52,6 +56,7 @@ var AceEditorView = Marionette.ItemView.extend({
     this.editor.setTheme(themePath);
     this.editor.setOption("maxLines", this.maxLines);
     this.editor.setOption("minLines", this.minLines);
+
     this.editor.setReadOnly(this.readOnly);
     session.setTabSize(this.tabSize);
     session.setUseSoftTabs(this.softTabs);
@@ -64,9 +69,7 @@ var AceEditorView = Marionette.ItemView.extend({
 
   // Create the editor and configure it
   onRender: function() {
-    this.$el.height('200px');
-    // console.log('lalala', this.el);
-    this.editor = ace.edit(this.el);
+    this.editor = ace.edit(this.ui.aceContainer[0]);
     this._configureEditor();
   },
 

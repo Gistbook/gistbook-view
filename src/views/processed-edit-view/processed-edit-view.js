@@ -12,6 +12,8 @@ var ProcessedEditView = Marionette.Layout.extend({
 
   className: 'processed-edit-view',
 
+  tagName: 'li',
+
   defaults: {
     InertView: undefined
   },

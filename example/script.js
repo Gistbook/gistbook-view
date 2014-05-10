@@ -2,7 +2,7 @@
 (function() {
 
   Backbone.Wreqr.radio.reqres.setHandler('global', 'authorized', function() {
-    return false;
+    return true;
   });
 
   // Set up a region to display the Gistbook within
