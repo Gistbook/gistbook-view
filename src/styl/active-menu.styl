@@ -1,0 +1,26 @@
+.gistblock-menu
+  padding 15px 0
+  position relative
+  &:hover
+    padding 14px 0
+    border 1px solid #98D0F5
+    border-radius 3px
+
+.gistblock-menu > a
+  position absolute
+  z-index 1000
+  display none
+  top 3px
+  color #30A6F5
+  &.gistblock-move
+    cursor -moz-grab
+    cursor -webkit-grab
+    cursor grab
+    left 10px
+  &.gistblock-delete
+    right 10px
+  &.gistblock-edit
+    right 30px
+
+.gistblock-menu:hover > a.active-option
+  display block

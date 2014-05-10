@@ -1,0 +1,14 @@
+body {
+  width: 1000px;
+  margin: 30px auto 50px;
+  font-family: Helvetica, arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+h1.header {
+  font-size: 25px;
+  text-align: center;
+
+  margin-bottom: 35px;
+}

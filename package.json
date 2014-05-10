@@ -1,0 +1,37 @@
+{
+  "name": "gb-compiler.js",
+  "version": "0.1.0",
+  "description": "The compiler for Gistbooks.",
+  "main": "src/gb-compiler.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "grunt"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gistbook/gb-compiler.js.git"
+  },
+  "keywords": [
+    "gist",
+    "gistbook",
+    "gists",
+    "javascript",
+    "share",
+    "code"
+  ],
+  "author": "Jmeas",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Gistbook/gb-compiler.js/issues"
+  },
+  "homepage": "https://github.com/Gistbook/gb-compiler.js",
+  "devDependencies": {
+    "grunt": "^0.4.4",
+    "grunt-preprocess": "^4.0.0",
+    "load-grunt-tasks": "^0.4.0",
+    "grunt-contrib-jst": "^0.6.0",
+    "grunt-contrib-stylus": "^0.15.1"
+  }
+}
