@@ -1,8 +1,8 @@
 {
-  "name": "gb-compiler.js",
+  "name": "gistbook-view",
   "version": "0.1.0",
-  "description": "The compiler for Gistbooks.",
-  "main": "src/gb-compiler.js",
+  "description": "A Marionette View for Gistbooks.",
+  "main": "lib/gistbook-view.js",
   "directories": {
     "test": "test"
   },
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Gistbook/gb-compiler.js.git"
+    "url": "https://github.com/Gistbook/gistbook-view.git"
   },
   "keywords": [
     "gist",
@@ -19,14 +19,23 @@
     "gists",
     "javascript",
     "share",
-    "code"
+    "code",
+    "backbone",
+    "marionette",
+    "markdown",
+    "mathjax",
+    "social",
+    "github",
+    "math",
+    "text",
+    "programming"
   ],
   "author": "Jmeas",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Gistbook/gb-compiler.js/issues"
+    "url": "https://github.com/Gistbook/gistbook-view/issues"
   },
-  "homepage": "https://github.com/Gistbook/gb-compiler.js",
+  "homepage": "https://github.com/Gistbook/gistbook-view",
   "devDependencies": {
     "grunt": "^0.4.4",
     "grunt-preprocess": "^4.0.0",
