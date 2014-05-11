@@ -32,6 +32,8 @@ var GistbookView = Marionette.CompositeView.extend({
       newArray = _.sortBy(newCollection, function(key, i) {
         return i;
       });
+      // Update the internal cached index
+      view._index = index;
     }, this);
     this.collection.reset(newArray, {silent: true});
   },
