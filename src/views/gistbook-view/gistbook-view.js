@@ -1,10 +1,23 @@
+/*
+ * gistbook-view
+ * -------------
+ * The publicly exposed view from this library.
+ * It is a composite view that renders the Gistbook.
+ *
+ */
+
 var GistbookView = Marionette.CompositeView.extend({
 
   // Create our collection from the gistbook's blocks
   initialize: function(options) {
     var gistblocks = options.model.get('blocks');
     this.collection = new Backbone.Collection(gistblocks);
+    this.collection.uniqueId = _.uniqueId();
+    this.collectionController = new CollectionController({
+      collection: this.collection
+    });
     this.authorized = radio.reqres.request('global', 'authorized');
+    this.gistbookCh = radio.channel(channelName(this.collection));
   },
 
   template: gistbookTemplates.gistbookView,
@@ -13,32 +26,32 @@ var GistbookView = Marionette.CompositeView.extend({
     container: '.gistbook-container'
   },
 
-  itemViewContainer: '.gistbook-container',
+  childViewContainer: '.gistbook-container',
 
   // Never used; just here to prevent errors
-  itemView: Marionette.ItemView.extend({
-    template: _.template('<div>hi</div>')
+  childView: Marionette.ItemView.extend({
+    template: _.template('')
   }),
 
   className: 'gistbook',
 
   // Determine the view based on the authorization
   // and model info
-  getItemView: function(model) {;
+  getChildView: function(model) {;
     var viewType = model.get('type');
     return this['_'+viewType+'View']();
   },
 
   _textView: function() {
     if (this.authorized) {
-      this.itemViewOptions = {
+      this.childViewOptions = {
         InertView: InertTextView
       };
       return ProcessedEditView;
     }
 
     else {
-      this.itemViewOptions = {};
+      this.childViewOptions = {};
       return InertTextView.extend({
         tagName: 'li'
       });
@@ -57,16 +70,22 @@ var GistbookView = Marionette.CompositeView.extend({
 
   _javascriptView: function() {
     if (this.authorized) {
-      this.itemViewOptions = {
+      var CustomAceEditor = AceEditorView.extend({
         className: 'gistblock gistblock-javascript'
-      };
-      return AceEditorView.extend({
-        tagName: 'li'
       });
+      this.childViewOptions = {
+        InertView: CustomAceEditor,
+        editOptions: {
+          edit: false,
+          delete: true,
+          move: true
+        }
+      };
+      return ProcessedEditView;
     }
 
     else {
-      this.itemViewOptions = {
+      this.childViewOptions = {
         readOnly: true,
         hideCursor: true,
         className: 'gistblock gistblock-javascript'
@@ -77,7 +96,7 @@ var GistbookView = Marionette.CompositeView.extend({
     }
   },
 
-  onBeforeClose: function() {
+  onBeforeDestroy: function() {
     // Shut down sortable
     this.ui.container.sortable('destroy');
   }

@@ -7,7 +7,7 @@
  *
  */
 
-var EditWrapper = Marionette.Layout.extend({
+var EditWrapper = Marionette.LayoutView.extend({
   template: gistbookTemplates.editWrapper,
 
   className: 'gistblock-editor',
@@ -54,6 +54,7 @@ var EditWrapper = Marionette.Layout.extend({
       return;
     }
     this.mode = 'preview';
+    this._updateCache();
     this.transitionUiToPreview();
     this.parent._updateCache();
     this.showPreview();
@@ -68,6 +69,13 @@ var EditWrapper = Marionette.Layout.extend({
     this.showEditor();
   },
 
+  // Update the cache when the user clicks update!
+  onUpdate: function() {
+    if (this.editor) {
+      this._updateCache();
+    }
+  },
+
   transitionUiToPreview: function() {
     this.ui.code.removeClass('active-tab');
     this.ui.preview.addClass('active-tab');
@@ -78,21 +86,29 @@ var EditWrapper = Marionette.Layout.extend({
     this.ui.code.addClass('active-tab');
   },
 
+  // Update the cache from the editor; do this before you
+  // destroy the editor
+  _updateCache: function() {
+    this.cache = this.editor.getValue();
+  },
+
   getAceEditorView: function() {
     var aceOptions = _.extend(this.aceEditorOptions, {model: this.model});
     return new AceEditorView(aceOptions);
   },
 
-  // Show the Ace Editor in our region
+  // Show the Ace Editor in our region; also set our cache
   showEditor: function() {
     var aceEditorView = this.getAceEditorView();
     var region = this.getRegion('content');
     region.show(aceEditorView);
     this.editor = region.currentView.editor;
+    this._updateCache();
   },
 
   // The preview is just an inert math view
   showPreview: function() {
+    this._updateCache();
     this.editor.destroy();
     var region = this.getRegion('content');
     delete this.editor;
@@ -107,6 +123,8 @@ var EditWrapper = Marionette.Layout.extend({
     var validOptions = _.keys(this.defaults)
     _.extend(this, this.defaults, _.pick(options, validOptions));
 
+    this.cache = this.model.toJSON();
+
     this.mode = 'code';
   },
 
@@ -118,7 +136,6 @@ var EditWrapper = Marionette.Layout.extend({
   // Show the editor view on the first render
   onRender: function() {
     this._showMenu();
-
     this.showEditor();
   },
 

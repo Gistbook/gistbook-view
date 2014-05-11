@@ -1,13 +1,11 @@
 /*
  * processed-edit-view
- * --------------
- * Some views are processed before they're rendered, like
- * MathJax and Markdown.
- * This is the edit view you should use for those things.
+ * -------------------
+ * The view you use when it's time to edit something
  *
  */
 
-var ProcessedEditView = Marionette.Layout.extend({
+var ProcessedEditView = Marionette.LayoutView.extend({
   template: gistbookTemplates.processedEditView,
 
   className: 'processed-edit-view',
@@ -15,7 +13,30 @@ var ProcessedEditView = Marionette.Layout.extend({
   tagName: 'li',
 
   defaults: {
-    InertView: undefined
+    InertView: undefined,
+    editOptions: {
+      edit: true,
+      delete: true,
+      move: true
+    }
+  },
+
+  ui: {
+    addText: '.add-text',
+    addJavascript: '.add-javascript'
+  },
+
+  triggers: {
+    'click @ui.addText': 'add:text',
+    'click @ui.addJavascript': 'add:javascript'
+  },
+
+  onAddText: function() {
+    this.gistbookCh.vent.trigger('add:block', 'text', this.model);
+  },
+
+  onAddJavascript: function() {
+    this.gistbookCh.vent.trigger('add:block', 'javascript', this.model);
   },
 
   // Sets our options, binds callback context, and creates
@@ -26,10 +47,11 @@ var ProcessedEditView = Marionette.Layout.extend({
 
     _.bindAll(this,
       'onEdit', 'onMove', 'onDelete',
-      'onCancel', 'onUpdate'
+      'onCancel', 'onUpdate',
+      'onAddText', 'onAddJavascript'
     );
-
     this._createCache();
+    this.gistbookCh = radio.channel(channelName(this.model));
   },
 
   // Store a cached model on the view. The user can manipulate
@@ -59,12 +81,8 @@ var ProcessedEditView = Marionette.Layout.extend({
 
   // Update the cache with the latest content of the Ace Editor
   _updateCache: function() {
-    this.cachedModel.set('source', this._getEditorValue());
-  },
-
-  // Get the value from the ace editor. Very deeply nested. Yikes.
-  _getEditorValue: function() {
-    return this.getRegion('wrapper').currentView.editor.getValue();
+    var cachedSource = this.getRegion('wrapper').currentView.cache;
+    this.cachedModel.set('source', cachedSource);
   },
 
   regions: {
@@ -72,16 +90,15 @@ var ProcessedEditView = Marionette.Layout.extend({
   },
 
   onEdit: function() {
-    // console.log('The parent has been told to edit');
-    // Remove handlers; the child is about to be destroyed
-    this.showEdit();
+    this.showActive();
   },
 
-  showPreview: function() {
+  showInert: function() {
     this.stopListening();
     this.getRegion('wrapper').show(
       new MenuWrapper({
         InertView: this.InertView,
+        editOptions: this.editOptions,
         model: this.cachedModel
       })
     );
@@ -89,7 +106,7 @@ var ProcessedEditView = Marionette.Layout.extend({
     this._configurePreviewListeners();
   },
 
-  showEdit: function() {
+  showActive: function() {
     this.stopListening();
     var region = this.getRegion('wrapper');
     region.show(
@@ -110,6 +127,7 @@ var ProcessedEditView = Marionette.Layout.extend({
     console.log('The parent has been told to move');
   },
 
+  // lol...pls refactor to use the channel
   onDelete: function() {
     this.model.collection.remove(this.model);
   },
@@ -118,7 +136,7 @@ var ProcessedEditView = Marionette.Layout.extend({
   // the saved state. Then, show the preview
   onCancel: function() {
     this._resetCache();
-    this.showPreview();
+    this.showInert();
   },
 
   // When the user updates, first update the cache with the value
@@ -127,12 +145,12 @@ var ProcessedEditView = Marionette.Layout.extend({
   onUpdate: function() {
     this._updateCache();
     this._saveCache();
-    this.showPreview();
+    this.showInert();
   },
 
   // Show the edit view with the InertView as the display
   onRender: function() {
-    this.showPreview();
+    this.showInert();
   },
 
   _configureEditListeners: function() {

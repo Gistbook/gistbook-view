@@ -7,7 +7,7 @@
  *
  */
 
-var MenuWrapper = Marionette.Layout.extend({
+var MenuWrapper = Marionette.LayoutView.extend({
   template: gistbookTemplates.menuWrapper,
 
   className: 'gistblock-menu',

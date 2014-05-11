@@ -31,7 +31,7 @@
     "programming"
   ],
   "dependencies": {
-    "backbone.marionette": "~1.8.5",
+    "backbone.marionette": "v2.0",
     "MathJax": "*",
     "marked": "~0.3.2",
     "ace-builds": "https://github.com/ajaxorg/ace-builds.git#~1.1.3",

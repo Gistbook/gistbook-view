@@ -10,16 +10,22 @@ var InertTextView = Marionette.ItemView.extend({
 
   className: 'gistblock gistblock-text',
 
-  // After render begin processing the markdown
+  // After render, pass it to MathJax and then Markdown
   onRender: function() {
 
-    var markdown = this.model.get('source');
+    var text = this.model.get('source');
     var $el = this.$el;
+    var tempText = '';
 
-    if (markdown) {
-      marked(markdown, function(err, content) {
-        $el.html(content);
-        MathJax.Hub.Queue(["Typeset",MathJax.Hub,$el[0]]);
+    if (text) {
+
+      // lol Mathjax API
+      $el.html(text);
+      MathJax.Hub.Queue(["Typeset",MathJax.Hub,$el[0]]);
+      MathJax.Hub.Queue(function() {
+        marked($el.html(), function(err, content) {
+          $el.html(content);
+        });
       });
     }
   }

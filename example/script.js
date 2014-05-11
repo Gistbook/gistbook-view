@@ -16,7 +16,9 @@
   // Get our view
   var GistbookView = window.GistbookView;
 
+  window.gistbookView = new GistbookView({model:gistbook});
+
   // Show the gistbook
-  region.show(new GistbookView({model:gistbook}));
+  region.show(window.gistbookView);
 
 })();

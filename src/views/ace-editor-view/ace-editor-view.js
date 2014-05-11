@@ -74,7 +74,7 @@ var AceEditorView = Marionette.ItemView.extend({
   },
 
   // Clean up the editor before we close down!
-  onBeforeClose: function() {
+  onBeforeDestroy: function() {
     this.editor.destroy();
   }
 });
