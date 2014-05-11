@@ -20,6 +20,22 @@ var GistbookView = Marionette.CompositeView.extend({
     this.gistbookCh = radio.channel(channelName(this.collection));
   },
 
+  // Silently update the collection based on the new DOM indices
+  resortByDom: function() {
+    var newCollection = {};
+    var newArray = [];
+    var index, view;
+    this.collection.each(function(model, i) {
+      view = this.children.findByModel(model);
+      index = this.ui.container.children().index(view.el);
+      newCollection[index] = model;
+      newArray = _.sortBy(newCollection, function(key, i) {
+        return i;
+      });
+    }, this);
+    this.collection.reset(newArray, {silent: true});
+  },
+
   template: gistbookTemplates.gistbookView,
 
   ui: {
@@ -61,10 +77,15 @@ var GistbookView = Marionette.CompositeView.extend({
 
   // Make it sortable if we're authorized
   onRender: function() {
+    this._setUpSortable();
+  },
+
+  _setUpSortable: function() {
     if (this.authorized) {
       this.ui.container.sortable({
         handle: '.gistblock-move'
       });
+      this.ui.container.on('sortupdate', _.bind(this.resortByDom, this));
     }
   },
 

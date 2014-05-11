@@ -1,3 +1,11 @@
+/*
+ * The collection controller manages the cache of the Gistblocks
+ *
+ *
+ *
+ *
+ */
+
 var CollectionController = Marionette.Controller.extend({
 
   initialize: function(options) {
