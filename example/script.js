@@ -7,7 +7,7 @@
 
   // Set up a region to display the Gistbook within
   var region = new Marionette.Region({
-    el: '.gistbook-container'
+    el: '.gistbook-location'
   });
 
   // Get our gistbook in Backbone form

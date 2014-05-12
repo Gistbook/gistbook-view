@@ -2056,9 +2056,15 @@ button.blue:hover,
   resize: vertical;
   width: 100%;
   min-height: 100px;
+  padding: 10px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  border: 1px solid #ccc;
 }
 .gistbook {
   border: 1px solid #ccc;
+  -webkit-box-shadow: 0 0 0 4px #f6f6f6;
+  box-shadow: 0 0 0 4px #f6f6f6;
   -webkit-border-radius: 3px;
   border-radius: 3px;
   width: 590px;
