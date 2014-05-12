@@ -10,10 +10,12 @@ var GistbookView = Marionette.CompositeView.extend({
 
   // Create our collection from the gistbook's blocks
   initialize: function(options) {
+    _.bindAll(this, 'resortByDom');
     var gistblocks = options.model.get('blocks');
+    this.initialRender = false;
     this.collection = new Backbone.Collection(gistblocks);
     this.collection.uniqueId = _.uniqueId();
-    this.collectionController = new CollectionController({
+    this.cacheController = new CacheController({
       collection: this.collection
     });
     this.authorized = radio.reqres.request('global', 'authorized');
@@ -25,14 +27,19 @@ var GistbookView = Marionette.CompositeView.extend({
     var newCollection = {};
     var newArray = [];
     var index, view;
-    this.collection.each(function(model, i) {
-      view = this.children.findByModel(model);
+    // var newArray = _.sortBy(this.collection, function(model, i) {
+    //
+    //   view = this.children.findByModel(model);
+    //   index = this.ui.container.children().index(view.el);
+    //   view._index = index;
+    //   return index;
+    // }, this);
+    this.children.each(function(view, i) {
       index = this.ui.container.children().index(view.el);
-      newCollection[index] = model;
+      newCollection[index] = view.model;
       newArray = _.sortBy(newCollection, function(key, i) {
         return i;
       });
-      // Update the internal cached index
       view._index = index;
     }, this);
     this.collection.reset(newArray, {silent: true});
@@ -65,6 +72,7 @@ var GistbookView = Marionette.CompositeView.extend({
       this.childViewOptions = {
         InertView: InertTextView
       };
+      this.childViewOptions.initialMode = this.initialRender ? 'active' : 'inert';
       return ProcessedEditView;
     }
 
@@ -79,6 +87,7 @@ var GistbookView = Marionette.CompositeView.extend({
 
   // Make it sortable if we're authorized
   onRender: function() {
+    this.initialRender = true;
     this._setUpSortable();
   },
 

@@ -14,6 +14,7 @@ var ProcessedEditView = Marionette.LayoutView.extend({
 
   defaults: {
     InertView: undefined,
+    initialMode: 'inert',
     editOptions: {
       edit: true,
       delete: true,
@@ -46,7 +47,7 @@ var ProcessedEditView = Marionette.LayoutView.extend({
     _.extend(this, this.defaults, _.pick(options, validOptions));
 
     _.bindAll(this,
-      'onEdit', 'onMove', 'onDelete',
+      'onEdit', 'onDelete',
       'onCancel', 'onUpdate',
       'onAddText', 'onAddJavascript'
     );
@@ -79,7 +80,7 @@ var ProcessedEditView = Marionette.LayoutView.extend({
     );
   },
 
-  // Update the cache with the latest content of the Ace Editor
+  // Update the cache with the latest content of the text editor
   _updateCache: function() {
     var cachedSource = this.getRegion('wrapper').currentView.cache;
     this.cachedModel.set('source', cachedSource);
@@ -123,10 +124,6 @@ var ProcessedEditView = Marionette.LayoutView.extend({
     this._configureEditListeners();
   },
 
-  onMove: function() {
-    console.log('The parent has been told to move');
-  },
-
   // lol...pls refactor to use the channel
   onDelete: function() {
     this.model.collection.remove(this.model);
@@ -150,7 +147,11 @@ var ProcessedEditView = Marionette.LayoutView.extend({
 
   // Show the edit view with the InertView as the display
   onRender: function() {
-    this.showInert();
+    if (this.initialMode === 'active') {
+      this.showActive();
+    } else {
+      this.showInert();
+    }
   },
 
   _configureEditListeners: function() {
@@ -161,6 +162,5 @@ var ProcessedEditView = Marionette.LayoutView.extend({
   _configurePreviewListeners: function() {
     this.listenTo(this.currentView, 'edit', this.onEdit);
     this.listenTo(this.currentView, 'delete', this.onDelete);
-    this.listenTo(this.currentView, 'move', this.onMove);
   }
 });

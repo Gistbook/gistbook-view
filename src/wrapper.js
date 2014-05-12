@@ -4,18 +4,19 @@
 
   var radio = Backbone.Wreqr.radio;
 
-  // @include radio-util.js
-
   // @include ../bower_components/html5sortable/jquery.sortable.js
 
-  // @include views/ace-editor-view/ace-editor-view.js
-  // @include views/text-view/text-view.js
-  // @include views/menu-wrapper/menu-wrapper.js
-  // @include views/edit-wrapper/edit-wrapper.js
-  // @include views/processed-edit-view/processed-edit-view.js
-  // @include collection-controller.js
+  // @include gistbook-view/gistbook-view.js
 
-  // @include views/gistbook-view/gistbook-view.js
+  // @include radio-util.js
+  // @include cache-controller.js
+
+  // @include child-views/ace-editor-view/ace-editor-view.js
+  // @include child-views/text-view/text-view.js
+  // @include child-views/text-edit-view/text-edit-view.js
+  // @include child-views/menu-wrapper/menu-wrapper.js
+  // @include child-views/edit-wrapper/edit-wrapper.js
+  // @include child-views/processed-edit-view/processed-edit-view.js
 
   window.GistbookView = GistbookView;
 

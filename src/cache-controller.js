@@ -1,12 +1,13 @@
 /*
- * The collection controller manages the cache of the Gistblocks
- *
- *
- *
+ * cache-controller
+ * ----------------
+ * A Gistbook-View works with a cache of a gistbook, so that
+ * user's changes aren't updated on the fly. Use the GistbookView API
+ * to persist the changes to the original data.
  *
  */
 
-var CollectionController = Marionette.Controller.extend({
+var CacheController = Marionette.Controller.extend({
 
   initialize: function(options) {
     _.bindAll(this, '_addBlock');
@@ -24,7 +25,7 @@ var CollectionController = Marionette.Controller.extend({
     if (index === -1) {
       return;
     }
-    // Add a new block
+    // Create a new block
     var newBlock = new Backbone.Model({
       type: type,
       source: ''

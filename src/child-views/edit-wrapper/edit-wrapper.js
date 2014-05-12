@@ -19,8 +19,6 @@ var EditWrapper = Marionette.LayoutView.extend({
     // What the tab says that shows the source
     sourceTabText: 'Code',
     PreviewView: undefined,
-    // Options to pass along to the ace editor
-    aceEditorOptions: {},
     parent: undefined
   },
 
@@ -53,27 +51,29 @@ var EditWrapper = Marionette.LayoutView.extend({
     if (this.mode === 'preview') {
       return;
     }
-    this.mode = 'preview';
     this._updateCache();
     this.transitionUiToPreview();
     this.parent._updateCache();
     this.showPreview();
+    this.mode = 'preview';
   },
 
   onCode: function() {
     if (this.mode === 'code') {
       return;
     }
-    this.mode = 'code';
     this.transitionUiToCode();
+    this.mode = 'code';
     this.showEditor();
   },
 
-  // Update the cache when the user clicks update!
+  // Update the cache when the user clicks update,
+  // only if you're in code mode
   onUpdate: function() {
-    if (this.editor) {
-      this._updateCache();
+    if (this.mode === 'preview') {
+      return;
     }
+    this._updateCache();
   },
 
   transitionUiToPreview: function() {
@@ -86,32 +86,33 @@ var EditWrapper = Marionette.LayoutView.extend({
     this.ui.code.addClass('active-tab');
   },
 
-  // Update the cache from the editor; do this before you
-  // destroy the editor
+  // Update the cache from the currentView
   _updateCache: function() {
-    this.cache = this.editor.getValue();
+    if (this.mode === 'preview') {
+      console.log('Warning: cache updated on preview');
+    }
+    var region = this.getRegion('content');
+    this.cache = region.currentView.value();
   },
 
-  getAceEditorView: function() {
-    var aceOptions = _.extend(this.aceEditorOptions, {model: this.model});
-    return new AceEditorView(aceOptions);
+  getTextEditorView: function() {
+    return new TextEditView({
+      model: this.model
+    });
   },
 
   // Show the Ace Editor in our region; also set our cache
   showEditor: function() {
-    var aceEditorView = this.getAceEditorView();
+    var textEditorView = this.getTextEditorView();
     var region = this.getRegion('content');
-    region.show(aceEditorView);
-    this.editor = region.currentView.editor;
+    region.show(textEditorView);
     this._updateCache();
   },
 
   // The preview is just an inert math view
   showPreview: function() {
     this._updateCache();
-    this.editor.destroy();
     var region = this.getRegion('content');
-    delete this.editor;
     region.show(new this.PreviewView({
       model: this.model
     }));

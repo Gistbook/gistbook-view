@@ -17,7 +17,7 @@ var AceEditorView = Marionette.ItemView.extend({
     highlightActiveLine: false,
     theme: 'tomorrow',
     mode: 'javascript',
-    minLines: 8,
+    minLines: 5,
     maxLines: 20,
     hideCursor: false,
     showGutter: false
