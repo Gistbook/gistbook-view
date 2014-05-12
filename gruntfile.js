@@ -13,6 +13,17 @@ module.exports = function(grunt) {
       }
     },
 
+    uglify: {
+      options: {
+        compress: true,
+        sourceMap: true
+      },
+      main: {
+        src: 'lib/gistbook-view.js',
+        dest: 'lib/gistbook-view.min.js'
+      } 
+    },
+
     copy: {
       fonts: {
         expand: true,
@@ -38,6 +49,7 @@ module.exports = function(grunt) {
 
     stylus: {
       options: {
+        compress: false,
         'include css': true,
         paths: [ 'bower_components' ]
       },
@@ -45,10 +57,20 @@ module.exports = function(grunt) {
         src: 'src/styl/style.styl',
         dest: 'lib/gistbook.css'
       }
+    },
+
+    cssmin: {
+      options: {
+        keepSpecialComments: false
+      },
+      main: {
+        src: 'lib/gistbook.css',
+        dest: 'lib/gistbook.min.css'
+      }
     }
 
   });
 
-  grunt.registerTask('default', ['jst', 'copy', 'preprocess', 'stylus']);
+  grunt.registerTask('default', ['jst', 'copy', 'preprocess', 'uglify', 'stylus', 'cssmin']);
 
 };
