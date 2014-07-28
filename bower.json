@@ -38,6 +38,7 @@
     "html5-reset": "~2.1.2",
     "nib": "~1.0.2",
     "html5sortable": "https://github.com/farhadi/html5sortable.git",
-    "marionette": "^2.0"
+    "marionette": "^2.1",
+    "backbone.radio": "~0.5.2"
   }
 }

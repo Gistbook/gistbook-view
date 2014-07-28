@@ -1,7 +1,7 @@
 // An example file uses the compiler
 (function() {
 
-  Backbone.Wreqr.radio.reqres.setHandler('global', 'authorized', function() {
+  Backbone.Radio.reply('auth', 'authorized', function() {
     return true;
   });
 

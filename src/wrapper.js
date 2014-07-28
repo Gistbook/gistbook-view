@@ -2,14 +2,17 @@
 
 (function() {
 
-  var radio = Backbone.Wreqr.radio;
+  var Radio = Backbone.Radio;
+
+  // @include resources/shim/radio.shim.js
+  // @include resources/shim/to-json.shim.js
 
   // @include ../bower_components/html5sortable/jquery.sortable.js
 
   // @include gistbook-view/gistbook-view.js
 
-  // @include radio-util.js
-  // @include cache-controller.js
+  // @include resources/util/radio-util.js
+  // @include resources/cache-controller/cache-controller.js
 
   // @include child-views/ace-editor-view/ace-editor-view.js
   // @include child-views/text-view/text-view.js

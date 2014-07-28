@@ -1,15 +1,23 @@
 /*
- * inert-text-view
+ * text-view
  * ---------------
  * Displays text, first formatted with Markdown, and then Latex.
  *
  */
 
 var InertTextView = Marionette.ItemView.extend({
+
+  // This doesn't need a template, as we're rendering the HTML through
+  // Mathjax and Marked. Once Marionette supports template: false; we should
+  // use that instead.
   template: _.template(''),
 
+  // They're not always displayed as sole gistblocks, such as
+  // when they're rendered in an edit view. For those
+  // times, the CSS is overwritten.
   className: 'gistblock gistblock-text',
 
+  // Bind some context when initialized
   initialize: function() {
     _.bindAll(this, '_parseMarked');
   },
@@ -19,7 +27,9 @@ var InertTextView = Marionette.ItemView.extend({
   onRender: function() {
     var text = this.model.escape('source');
 
-    if (!text) { return; }
+    if (!text) {
+      return;
+    }
 
     this.$el.html(text);
     this._parseText(text);

@@ -1,7 +1,6 @@
 var path = require('path');
 
 module.exports = function(grunt) {
-
   require('load-grunt-tasks')(grunt);
 
   grunt.initConfig({
@@ -9,7 +8,7 @@ module.exports = function(grunt) {
     preprocess: {
       main: {
         src: 'src/wrapper.js',
-        dest: 'lib/gistbook-view.js'
+        dest: 'dist/gistbook-view.js'
       }
     },
 
@@ -19,8 +18,8 @@ module.exports = function(grunt) {
         sourceMap: true
       },
       main: {
-        src: 'lib/gistbook-view.js',
-        dest: 'lib/gistbook-view.min.js'
+        src: 'dist/gistbook-view.js',
+        dest: 'dist/gistbook-view.min.js'
       } 
     },
 
@@ -50,12 +49,13 @@ module.exports = function(grunt) {
     stylus: {
       options: {
         compress: false,
+        import: ['../bower_components/nib/index'],
         'include css': true,
-        paths: [ 'bower_components' ]
+        paths: ['bower_components']
       },
       main: {
-        src: 'src/styl/style.styl',
-        dest: 'lib/gistbook.css'
+        src: ['src/styl/style.styl', 'src/gistbook-view/*.styl', 'src/child-views/**/*.styl'],
+        dest: 'dist/gistbook.css'
       }
     },
 
@@ -64,13 +64,19 @@ module.exports = function(grunt) {
         keepSpecialComments: false
       },
       main: {
-        src: 'lib/gistbook.css',
-        dest: 'lib/gistbook.min.css'
+        src: 'dist/gistbook.css',
+        dest: 'dist/gistbook.min.css'
       }
     }
 
   });
 
-  grunt.registerTask('default', ['jst', 'copy', 'preprocess', 'uglify', 'stylus', 'cssmin']);
-
+  grunt.registerTask('default', 'Build the Gistbook View', [
+    'jst',
+    'copy',
+    'preprocess',
+    'uglify',
+    'stylus',
+    'cssmin'
+  ]);
 };
