@@ -27,13 +27,7 @@ var GistbookView = Marionette.CompositeView.extend({
     var newCollection = {};
     var newArray = [];
     var index, view;
-    // var newArray = _.sortBy(this.collection, function(model, i) {
-    //
-    //   view = this.children.findByModel(model);
-    //   index = this.ui.container.children().index(view.el);
-    //   view._index = index;
-    //   return index;
-    // }, this);
+
     this.children.each(function(view, i) {
       index = this.ui.container.children().index(view.el);
       newCollection[index] = view.model;
@@ -42,6 +36,7 @@ var GistbookView = Marionette.CompositeView.extend({
       });
       view._index = index;
     }, this);
+    
     this.collection.reset(newArray, {silent: true});
   },
 
@@ -67,28 +62,15 @@ var GistbookView = Marionette.CompositeView.extend({
     return this['_'+viewType+'View']();
   },
 
-  _textView: function() {
-    if (this.authorized) {
-      this.childViewOptions = {
-        InertView: InertTextView
-      };
-      this.childViewOptions.initialMode = this.initialRender ? 'active' : 'inert';
-      return ProcessedEditView;
-    }
-
-    else {
-      this.childViewOptions = {};
-      return InertTextView.extend({
-        tagName: 'li'
-      });
-    }
-
-  },
-
   // Make it sortable if we're authorized
   onRender: function() {
     this.initialRender = true;
     this._setUpSortable();
+  },
+
+  // Shut down sortable before we destroy the view
+  onBeforeDestroy: function() {
+    this.ui.container.sortable('destroy');
   },
 
   _setUpSortable: function() {
@@ -97,6 +79,23 @@ var GistbookView = Marionette.CompositeView.extend({
         handle: '.gistblock-move'
       });
       this.ui.container.on('sortupdate', _.bind(this.resortByDom, this));
+    }
+  },
+  
+  _textView: function() {
+    if (this.authorized) {
+      this.childViewOptions = {
+        InertView: InertTextView
+      };
+      this.childViewOptions.initialMode = this.initialRender ? 'active' : 'inert';
+      return ControlsWrapper;
+    }
+
+    else {
+      this.childViewOptions = {};
+      return InertTextView.extend({
+        tagName: 'li'
+      });
     }
   },
 
@@ -113,7 +112,7 @@ var GistbookView = Marionette.CompositeView.extend({
           move: true
         }
       };
-      return ProcessedEditView;
+      return ControlsWrapper;
     }
 
     else {
@@ -126,10 +125,5 @@ var GistbookView = Marionette.CompositeView.extend({
         tagName: 'li'
       });
     }
-  },
-
-  onBeforeDestroy: function() {
-    // Shut down sortable
-    this.ui.container.sortable('destroy');
   }
 });

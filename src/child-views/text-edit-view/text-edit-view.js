@@ -12,6 +12,7 @@ var TextEditView = Marionette.ItemView.extend({
 
   className: 'gistbook-textarea',
 
+  // Get the value of the element
   value: function() {
     return this.el.value;
   }

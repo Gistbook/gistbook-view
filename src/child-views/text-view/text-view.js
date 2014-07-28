@@ -10,23 +10,32 @@ var InertTextView = Marionette.ItemView.extend({
 
   className: 'gistblock gistblock-text',
 
-  // After render, pass it to MathJax and then Markdown
+  initialize: function() {
+    _.bindAll(this, '_parseMarked');
+  },
+
+  // After render, check if the user has inputted any text. If so,
+  // pass it along to be rendered by Mathjax and Marked.
   onRender: function() {
+    var text = this.model.escape('source');
 
-    var text = this.model.get('source');
+    if (!text) { return; }
+
+    this.$el.html(text);
+    this._parseText(text);
+  },
+
+  // Parse the text of the element as Mathjax, and then pass it along to Marked.
+  _parseText: function(text) {
+    MathJax.Hub.Queue(['Typeset', MathJax.Hub, this.$el[0]]);
+    MathJax.Hub.Queue(this._parseMarked);
+  },
+
+  // Parse the element's HTML as Markdown, then set the element's text.
+  _parseMarked: function() {
     var $el = this.$el;
-    var tempText = '';
-
-    if (text) {
-
-      // lol Mathjax API
-      $el.html(text);
-      MathJax.Hub.Queue(["Typeset",MathJax.Hub,$el[0]]);
-      MathJax.Hub.Queue(function() {
-        marked($el.html(), function(err, content) {
-          $el.html(content);
-        });
-      });
-    }
+    marked($el.html(), function(err, content) {
+      $el.html(content);
+    });
   }
 });

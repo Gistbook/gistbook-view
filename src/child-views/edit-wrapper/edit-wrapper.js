@@ -1,9 +1,8 @@
 /*
  * edit-wrapper
  * ------------
- * A wrapper for an editable Ace Editor View;
- * It provides the controls to toggle between source/preview,
- * and the buttons to cancel/save the changes
+ * A wrapper for an editable View; it provides the controls to toggle
+ * between source/preview, and the buttons to cancel/save the changes.
  *
  */
 
@@ -20,6 +19,17 @@ var EditWrapper = Marionette.LayoutView.extend({
     sourceTabText: 'Code',
     PreviewView: undefined,
     parent: undefined
+  },
+
+  // Store our options on the object itself.
+  // Also set the initial mode to be code.
+  initialize: function(options) {
+    var validOptions = _.keys(this.defaults)
+    _.extend(this, this.defaults, _.pick(options, validOptions));
+
+    this.cache = this.model.toJSON();
+
+    this.mode = 'code';
   },
 
   serializeData: function() {
@@ -86,17 +96,14 @@ var EditWrapper = Marionette.LayoutView.extend({
     this.ui.code.addClass('active-tab');
   },
 
-  // Update the cache from the currentView
-  _updateCache: function() {
-    if (this.mode === 'preview') {
-      console.log('Warning: cache updated on preview');
-    }
-    var region = this.getRegion('content');
-    this.cache = region.currentView.value();
-  },
-
   getTextEditorView: function() {
     return new TextEditView({
+      model: this.model
+    });
+  },
+
+  getPreviewView: function() {
+    return new this.PreviewView({
       model: this.model
     });
   },
@@ -113,20 +120,8 @@ var EditWrapper = Marionette.LayoutView.extend({
   showPreview: function() {
     this._updateCache();
     var region = this.getRegion('content');
-    region.show(new this.PreviewView({
-      model: this.model
-    }));
-  },
-
-  // Store our options on the object itself.
-  // Also set the initial mode to be code.
-  initialize: function(options) {
-    var validOptions = _.keys(this.defaults)
-    _.extend(this, this.defaults, _.pick(options, validOptions));
-
-    this.cache = this.model.toJSON();
-
-    this.mode = 'code';
+    var previewView = this.getPreviewView();
+    region.show(previewView);
   },
 
   // Where to render the inert view
@@ -138,6 +133,15 @@ var EditWrapper = Marionette.LayoutView.extend({
   onRender: function() {
     this._showMenu();
     this.showEditor();
+  },
+
+  // Update the cache from the currentView
+  _updateCache: function() {
+    if (this.mode === 'preview') {
+      console.log('Warning: cache updated on preview');
+    }
+    var region = this.getRegion('content');
+    this.cache = region.currentView.value();
   },
 
   // Show or hide each menu item based on options

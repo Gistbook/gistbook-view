@@ -25,11 +25,13 @@ var CacheController = Marionette.Controller.extend({
     if (index === -1) {
       return;
     }
+
     // Create a new block
     var newBlock = new Backbone.Model({
       type: type,
       source: ''
     });
+    
     // Adds the block
     this.collection.add(newBlock, {
       at: index

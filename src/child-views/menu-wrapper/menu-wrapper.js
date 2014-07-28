@@ -4,7 +4,6 @@
  * A wrapper for an Inert View;
  * It provides controls for editing
  *
- *
  */
 
 var MenuWrapper = Marionette.LayoutView.extend({
@@ -20,6 +19,11 @@ var MenuWrapper = Marionette.LayoutView.extend({
       delete: true,
       move: true
     }
+  },
+
+  // Where to render the inert view
+  regions: {
+    content: '.gistblock-content'
   },
 
   // Where to put the InertView, and the 3 menu options
@@ -43,18 +47,18 @@ var MenuWrapper = Marionette.LayoutView.extend({
     _.extend(this, this.defaults, _.pick(options, validOptions));
   },
 
-  // Where to render the inert view
-  regions: {
-    content: '.gistblock-content'
+  getInertView: function() {
+    return new this.InertView({
+      model: this.model
+    });
   },
 
   // Show the inert view after rendering
   onRender: function() {
     this._showMenu();
     var region = this.getRegion('content');
-    region.show(new this.InertView({
-      model: this.model
-    }));
+    var inertView = this.getInertView();
+    region.show(inertView);
   },
 
   // Show or hide each menu item based on options
