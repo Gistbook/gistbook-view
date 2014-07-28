@@ -6,6 +6,10 @@
     title: 'Lesson 1: Pythagorean Theorem',
 
     blocks: [
+     {
+        type: 'text',
+        source: 'Welcome to Gistbook!\n\nHover over these sections to see the menu options.\n\nThere are also menu options between the blocks to create a new block.'
+      },
       {
         type: 'text',
         source: '## Pythagorean Theorem\n\nThe pythagorean theorem calculates the hypotenuse of a triangle.\n\n'+
@@ -13,16 +17,12 @@
         'It can be calculated in Javascript with a simple function.'
       },
       {
-        type: 'text',
-        source: 'James is here ok'
-      },
-      {
         type: 'javascript',
         source: 'var norm = function(a, b) {\n  var obj = {\n  name: "james",\n  affil: true\n};'
       },
       {
         type: 'text',
-        source: 'The Marionette `ItemView` is one cool class'
+        source: 'Lala more text.'
       }
     ],
     resources: [
