@@ -1,10 +1,7 @@
 /*
  * controls-wrapper
  * ----------------
- * Views that can be edited are wrapped in controls that appear on hover.
- * This includes the menu options to create new views above or below the view,
- * as well as the move, delete, and edit menu options. This is the view
- * wrapper that provides those tools.
+ * This is the view wrapper that provides the tools to create a view above the current view.
  *
  */
 
@@ -52,7 +49,7 @@ var ControlsWrapper = Marionette.LayoutView.extend({
     );
 
     this._createCache();
-    this.gistbookCh = radio.channel(channelName(this.model));
+    this.gistbookCh = Backbone.Radio.channel(radioUtil.channelName(this.model));
   },
 
   onEdit: function() {
@@ -72,11 +69,11 @@ var ControlsWrapper = Marionette.LayoutView.extend({
   },
 
   onAddText: function() {
-    this.gistbookCh.vent.trigger('add:block', 'text', this.model);
+    this.gistbookCh.trigger('add:block', 'text', this.model);
   },
 
   onAddJavascript: function() {
-    this.gistbookCh.vent.trigger('add:block', 'javascript', this.model);
+    this.gistbookCh.trigger('add:block', 'javascript', this.model);
   },
 
   showInert: function() {

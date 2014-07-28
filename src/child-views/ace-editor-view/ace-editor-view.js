@@ -7,7 +7,7 @@
  */
 
 var AceEditorView = Marionette.ItemView.extend({
-  template: _.template('<div class="ace-wrapper"><div class="ace-editor"><%= source %></div></div>'),
+  template: gistbookTemplates.aceEditorView,
 
   // Defaults for the view
   defaults: {

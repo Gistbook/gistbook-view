@@ -16,7 +16,7 @@ var EditWrapper = Marionette.LayoutView.extend({
   // Default values for options
   defaults: {
     // What the tab says that shows the source
-    sourceTabText: 'Code',
+    sourceTabText: 'Write',
     PreviewView: undefined,
     parent: undefined
   },
@@ -137,9 +137,6 @@ var EditWrapper = Marionette.LayoutView.extend({
 
   // Update the cache from the currentView
   _updateCache: function() {
-    if (this.mode === 'preview') {
-      console.log('Warning: cache updated on preview');
-    }
     var region = this.getRegion('content');
     this.cache = region.currentView.value();
   },

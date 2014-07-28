@@ -1,5 +1,17 @@
 this["gistbookTemplates"] = this["gistbookTemplates"] || {};
 
+this["gistbookTemplates"]["aceEditorView"] = function(obj) {
+obj || (obj = {});
+var __t, __p = '', __e = _.escape;
+with (obj) {
+__p += '<div class="ace-wrapper">\n  <div class="ace-editor">' +
+((__t = ( source )) == null ? '' : __t) +
+'</div>\n</div>\n';
+
+}
+return __p
+};
+
 this["gistbookTemplates"]["controlsWrapper"] = function(obj) {
 obj || (obj = {});
 var __t, __p = '', __e = _.escape;
@@ -32,6 +44,18 @@ __p += '<a href=\'#\' class=\'gistblock-move\'><i class=\'fa fa-bars\'></i></a>\
 return __p
 };
 
+this["gistbookTemplates"]["textEditView"] = function(obj) {
+obj || (obj = {});
+var __t, __p = '', __e = _.escape;
+with (obj) {
+__p +=
+((__t = ( source )) == null ? '' : __t) +
+'\n';
+
+}
+return __p
+};
+
 this["gistbookTemplates"]["gistbookView"] = function(obj) {
 obj || (obj = {});
 var __t, __p = '', __e = _.escape;
@@ -46,7 +70,38 @@ return __p
 
 (function() {
 
-  var radio = Backbone.Wreqr.radio;
+  var Radio = Backbone.Radio;
+
+  /*
+   * radio-shim
+   * ----------
+   * Safely use Backbone.Radio in place of Wreqr.
+   *
+   */
+  
+  Marionette.Application.prototype._initChannel = function () {
+    this.channelName = _.result(this, 'channelName') || 'global';
+    this.channel = _.result(this, 'channel') || Radio.channel(this.channelName);
+  }
+  
+  /*
+   * to-json shim
+   * ------------
+   * Marionette v2.x Views use toJSON for serialization. Tsk tsk.
+   * This fixes that misuse of toJSON.
+   *
+   */
+  
+  
+  Marionette.View.prototype.serializeModel = function(model) {
+    model = model || this.model;
+    return _.clone(model.attributes);
+  };
+  
+  Marionette.ItemView.prototype.serializeCollection = function() {
+    return collection.map(function(model){ return this.serializeModel(model); }, this);
+  };
+  
 
   /*
    * HTML5 Sortable jQuery Plugin
@@ -155,8 +210,8 @@ return __p
       this.cacheController = new CacheController({
         collection: this.collection
       });
-      this.authorized = radio.reqres.request('global', 'authorized');
-      this.gistbookCh = radio.channel(channelName(this.collection));
+      this.authorized = Backbone.Radio.request('auth', 'authorized');
+      this.gistbookCh = Backbone.Radio.channel(radioUtil.channelName(this.collection));
     },
   
     // Silently update the collection based on the new DOM indices
@@ -266,11 +321,20 @@ return __p
   });
   
 
+  /*
+   * radio-util
+   * ----------
+   * Utility methods for Backbone.Radio
+   *
+   */
   
-  // Generate a channel name from a collection or a model in a collection
-  window.channelName = function( entity ) {
-    entity = entity instanceof Backbone.Model ? entity.collection : entity;
-    return 'gistbook-'+entity.uniqueId;
+  var radioUtil = {
+  
+    // Generate a unique channel name from a collection or a model
+    channelName: function(entity) {
+      entity = entity instanceof Backbone.Model ? entity.collection : entity;
+      return 'gistbook-' + entity.uniqueId;
+    }
   };
   
   /*
@@ -287,12 +351,12 @@ return __p
     initialize: function(options) {
       _.bindAll(this, '_addBlock');
       this.collection = options.collection;
-      this.gistbookCh = radio.channel(channelName(this.collection));
+      this.gistbookCh = Backbone.Radio.channel(radioUtil.channelName(this.collection));
       this._configureListeners();
     },
   
     _configureListeners: function() {
-      this.listenTo(this.gistbookCh.vent, 'add:block', this._addBlock);
+      this.listenTo(this.gistbookCh, 'add:block', this._addBlock);
     },
   
     _addBlock: function(type, model) {
@@ -324,7 +388,7 @@ return __p
    */
   
   var AceEditorView = Marionette.ItemView.extend({
-    template: _.template('<div class="ace-wrapper"><div class="ace-editor"><%= source %></div></div>'),
+    template: gistbookTemplates.aceEditorView,
   
     // Defaults for the view
     defaults: {
@@ -397,17 +461,25 @@ return __p
   });
   
   /*
-   * inert-text-view
+   * text-view
    * ---------------
    * Displays text, first formatted with Markdown, and then Latex.
    *
    */
   
   var InertTextView = Marionette.ItemView.extend({
+  
+    // This doesn't need a template, as we're rendering the HTML through
+    // Mathjax and Marked. Once Marionette supports template: false; we should
+    // use that instead.
     template: _.template(''),
   
+    // They're not always displayed as sole gistblocks, such as
+    // when they're rendered in an edit view. For those
+    // times, the CSS is overwritten.
     className: 'gistblock gistblock-text',
   
+    // Bind some context when initialized
     initialize: function() {
       _.bindAll(this, '_parseMarked');
     },
@@ -417,7 +489,9 @@ return __p
     onRender: function() {
       var text = this.model.escape('source');
   
-      if (!text) { return; }
+      if (!text) {
+        return;
+      }
   
       this.$el.html(text);
       this._parseText(text);
@@ -446,7 +520,7 @@ return __p
    */
   
   var TextEditView = Marionette.ItemView.extend({
-    template: _.template('<%= source %>'),
+    template: gistbookTemplates.textEditView,
   
     tagName: 'textarea',
   
@@ -547,7 +621,7 @@ return __p
     // Default values for options
     defaults: {
       // What the tab says that shows the source
-      sourceTabText: 'Code',
+      sourceTabText: 'Write',
       PreviewView: undefined,
       parent: undefined
     },
@@ -668,9 +742,6 @@ return __p
   
     // Update the cache from the currentView
     _updateCache: function() {
-      if (this.mode === 'preview') {
-        console.log('Warning: cache updated on preview');
-      }
       var region = this.getRegion('content');
       this.cache = region.currentView.value();
     },
@@ -686,10 +757,7 @@ return __p
   /*
    * controls-wrapper
    * ----------------
-   * Views that can be edited are wrapped in controls that appear on hover.
-   * This includes the menu options to create new views above or below the view,
-   * as well as the move, delete, and edit menu options. This is the view
-   * wrapper that provides those tools.
+   * This is the view wrapper that provides the tools to create a view above the current view.
    *
    */
   
@@ -737,7 +805,7 @@ return __p
       );
   
       this._createCache();
-      this.gistbookCh = radio.channel(channelName(this.model));
+      this.gistbookCh = Backbone.Radio.channel(radioUtil.channelName(this.model));
     },
   
     onEdit: function() {
@@ -757,11 +825,11 @@ return __p
     },
   
     onAddText: function() {
-      this.gistbookCh.vent.trigger('add:block', 'text', this.model);
+      this.gistbookCh.trigger('add:block', 'text', this.model);
     },
   
     onAddJavascript: function() {
-      this.gistbookCh.vent.trigger('add:block', 'javascript', this.model);
+      this.gistbookCh.trigger('add:block', 'javascript', this.model);
     },
   
     showInert: function() {

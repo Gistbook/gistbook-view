@@ -6,7 +6,7 @@
  */
 
 var TextEditView = Marionette.ItemView.extend({
-  template: _.template('<%= source %>'),
+  template: gistbookTemplates.textEditView,
 
   tagName: 'textarea',
 

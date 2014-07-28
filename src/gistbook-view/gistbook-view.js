@@ -18,8 +18,8 @@ var GistbookView = Marionette.CompositeView.extend({
     this.cacheController = new CacheController({
       collection: this.collection
     });
-    this.authorized = radio.reqres.request('global', 'authorized');
-    this.gistbookCh = radio.channel(channelName(this.collection));
+    this.authorized = Backbone.Radio.request('auth', 'authorized');
+    this.gistbookCh = Backbone.Radio.channel(radioUtil.channelName(this.collection));
   },
 
   // Silently update the collection based on the new DOM indices
