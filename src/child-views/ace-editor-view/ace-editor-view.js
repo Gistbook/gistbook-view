@@ -2,7 +2,7 @@
  * ace-editor-view
  * ---------------
  * A view for the ace editor. Used for both
- * inert and active views
+ * inert and active views.
  *
  */
 
@@ -33,14 +33,15 @@ var AceEditorView = Marionette.ItemView.extend({
     _.extend(this, this.defaults, _.pick(options, validOptions));
   },
 
-  // Where ace stores its themes
-  _getThemePath: function(themeName) {
-    return 'ace/theme/'+themeName;
+  // Create the editor and configure it
+  onRender: function() {
+    this.editor = ace.edit(this.ui.aceContainer[0]);
+    this._configureEditor();
   },
 
-  // Where ace stores modes
-  _getModePath: function(modeName) {
-    return 'ace/mode/'+modeName;
+  // Clean up the editor before we close the view down
+  onBeforeDestroy: function() {
+    this.editor.destroy();
   },
 
   // Configure the editor based on our options
@@ -67,14 +68,13 @@ var AceEditorView = Marionette.ItemView.extend({
     }
   },
 
-  // Create the editor and configure it
-  onRender: function() {
-    this.editor = ace.edit(this.ui.aceContainer[0]);
-    this._configureEditor();
+  // Where ace stores its themes
+  _getThemePath: function(themeName) {
+    return 'ace/theme/' + themeName;
   },
 
-  // Clean up the editor before we close down!
-  onBeforeDestroy: function() {
-    this.editor.destroy();
+  // Where ace stores modes
+  _getModePath: function(modeName) {
+    return 'ace/mode/' + modeName;
   }
 });
