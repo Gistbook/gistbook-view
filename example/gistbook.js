@@ -2,7 +2,6 @@
 (function() {
 
   var gistbook = {
-
     title: 'Lesson 1: Pythagorean Theorem',
 
     blocks: [
@@ -28,7 +27,6 @@
     resources: [
       'http://www.whatever.com/marionette.com'
     ]
-
   };
 
   window.gistbook = gistbook;

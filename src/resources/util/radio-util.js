@@ -8,8 +8,12 @@
 var radioUtil = {
 
   // Generate a unique channel name from a collection or a model
-  channelName: function(entity) {
-    entity = entity instanceof Backbone.Model ? entity.collection : entity;
+  entityChannelName: function(entity) {
     return 'gistbook-' + entity.uniqueId;
+  },
+
+  // Get the channel from an entity
+  entityChannel: function(entity) {
+    return Radio.channel(radioUtil.entityChannelName(entity));
   }
 };

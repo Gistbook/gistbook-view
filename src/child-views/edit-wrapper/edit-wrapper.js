@@ -18,14 +18,21 @@ var EditWrapper = Marionette.LayoutView.extend({
     // What the tab says that shows the source
     sourceTabText: 'Write',
     PreviewView: undefined,
-    parent: undefined
+    blockChannel: undefined
   },
+
+  sourceTabText: 'Write',
+
+  editWrapperOptions: [
+    'sourceTabText',
+    'PreviewView',
+    'blockChannel'
+  ],
 
   // Store our options on the object itself.
   // Also set the initial mode to be code.
   initialize: function(options) {
-    var validOptions = _.keys(this.defaults)
-    _.extend(this, this.defaults, _.pick(options, validOptions));
+    this.mergeOptions(options, this.editWrapperOptions);
 
     this.cache = this.model.toJSON();
 
@@ -61,9 +68,9 @@ var EditWrapper = Marionette.LayoutView.extend({
     if (this.mode === 'preview') {
       return;
     }
-    this._updateCache();
+    this._setCache();
     this.transitionUiToPreview();
-    this.parent._updateCache();
+    this.triggerMethod('updateCache');
     this.showPreview();
     this.mode = 'preview';
   },
@@ -83,7 +90,7 @@ var EditWrapper = Marionette.LayoutView.extend({
     if (this.mode === 'preview') {
       return;
     }
-    this._updateCache();
+    this._setCache();
   },
 
   transitionUiToPreview: function() {
@@ -103,7 +110,7 @@ var EditWrapper = Marionette.LayoutView.extend({
   },
 
   getPreviewView: function() {
-    return new this.PreviewView({
+    return this.blockChannel.request('displayView', {
       model: this.model
     });
   },
@@ -113,12 +120,12 @@ var EditWrapper = Marionette.LayoutView.extend({
     var textEditorView = this.getTextEditorView();
     var region = this.getRegion('content');
     region.show(textEditorView);
-    this._updateCache();
+    this._setCache();
   },
 
   // The preview is just an inert math view
   showPreview: function() {
-    this._updateCache();
+    this._setCache();
     var region = this.getRegion('content');
     var previewView = this.getPreviewView();
     region.show(previewView);
@@ -135,8 +142,8 @@ var EditWrapper = Marionette.LayoutView.extend({
     this.showEditor();
   },
 
-  // Update the cache from the currentView
-  _updateCache: function() {
+  // Set the cache from the value in the currentView
+  _setCache: function() {
     var region = this.getRegion('content');
     this.cache = region.currentView.value();
   },

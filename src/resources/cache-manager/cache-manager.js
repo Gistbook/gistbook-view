@@ -1,18 +1,18 @@
 /*
- * cache-controller
- * ----------------
+ * cache-manager
+ * -------------
  * A Gistbook-View works with a cache of a gistbook, so that
  * user's changes aren't updated on the fly. Use the GistbookView API
  * to persist the changes to the original data.
  *
  */
 
-var CacheController = Marionette.Controller.extend({
+var CacheManager = Marionette.Object.extend({
 
   initialize: function(options) {
     _.bindAll(this, '_addBlock');
     this.collection = options.collection;
-    this.gistbookCh = Backbone.Radio.channel(radioUtil.channelName(this.collection));
+    this.gistbookCh = radioUtil.entityChannel(this.collection);
     this._configureListeners();
   },
 

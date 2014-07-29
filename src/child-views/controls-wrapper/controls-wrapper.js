@@ -1,7 +1,9 @@
 /*
  * controls-wrapper
  * ----------------
- * This is the view wrapper that provides the tools to create a view above the current view.
+ * This is the view wrapper that provides the tools to create a
+ * view above the current view. It also manages data that is
+ * shared between the edit and preview views.
  *
  */
 
@@ -12,15 +14,18 @@ var ControlsWrapper = Marionette.LayoutView.extend({
 
   tagName: 'li',
 
-  defaults: {
-    InertView: undefined,
-    initialMode: 'inert',
-    editOptions: {
-      edit: true,
-      delete: true,
-      move: true
-    }
+  initialMode: 'inert',
+
+  editOptions: {
+    edit: true,
+    delete: true,
+    move: true
   },
+
+  controlsWrapperOptions: [
+    'editOptions',
+    'initialMode'
+  ],
 
   regions: {
     wrapper: '.gistblock-wrapper'
@@ -39,8 +44,7 @@ var ControlsWrapper = Marionette.LayoutView.extend({
   // Sets our options, binds callback context, and creates
   // a cached model for users to mess around with
   initialize: function(options) {
-    var validOptions = _.keys(this.defaults)
-    _.extend(this, this.defaults, _.pick(options, validOptions));
+    this.mergeOptions(options, this.controlsWrapperOptions);
 
     _.bindAll(this,
       'onEdit', 'onDelete',
@@ -49,7 +53,7 @@ var ControlsWrapper = Marionette.LayoutView.extend({
     );
 
     this._createCache();
-    this.gistbookCh = Backbone.Radio.channel(radioUtil.channelName(this.model));
+    this.gistbookCh = radioUtil.entityChannel(this.model.collection);
   },
 
   onEdit: function() {
@@ -86,9 +90,8 @@ var ControlsWrapper = Marionette.LayoutView.extend({
 
   showActive: function() {
     this.stopListening();
-    var region = this.getRegion('wrapper');
     var editWrapper = this.getEditWrapper();
-    region.show(editWrapper);
+    this.getRegion('wrapper').show(editWrapper);
     this.currentView = editWrapper;
     this._configureEditListeners();
   },
@@ -109,20 +112,19 @@ var ControlsWrapper = Marionette.LayoutView.extend({
 
   getMenuWrapper: function() {
     return new MenuWrapper({
-      InertView: this.InertView,
       editOptions: this.editOptions,
-      model: this.cachedModel
+      model: this.cachedModel,
+      blockChannel: radioUtil.entityChannel(this.model)
     });
   },
 
   getEditWrapper: function() {
     return new EditWrapper({
-      PreviewView: this.InertView,
       model: this.cachedModel,
+      blockChannel: radioUtil.entityChannel(this.model),
       aceEditorOptions: {
         minLines: 4
-      },
-      parent: this
+      }
     });
   },
 
@@ -147,7 +149,8 @@ var ControlsWrapper = Marionette.LayoutView.extend({
     this.cachedModel.set(this.model.toJSON());
   },
 
-  // Update the cache with the latest content of the text editor
+  // Update the cache with the latest content of the text editor. Only
+  // makes sense to be called when the currentView is the cache
   _updateCache: function() {
     var cachedSource = this.getRegion('wrapper').currentView.cache;
     this.cachedModel.set('source', cachedSource);
@@ -156,6 +159,7 @@ var ControlsWrapper = Marionette.LayoutView.extend({
   _configureEditListeners: function() {
     this.listenTo(this.currentView, 'cancel', this.onCancel);
     this.listenTo(this.currentView, 'update', this.onUpdate);
+    this.listenTo(this.currentView, 'updateCache', this._updateCache);
   },
 
   _configurePreviewListeners: function() {

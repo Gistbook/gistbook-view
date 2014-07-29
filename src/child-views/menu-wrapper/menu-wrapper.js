@@ -11,14 +11,15 @@ var MenuWrapper = Marionette.LayoutView.extend({
 
   className: 'gistblock-menu',
 
-  // Default values for options
-  defaults: {
-    InertView: undefined,
-    editOptions: {
-      edit: true,
-      delete: true,
-      move: true
-    }
+  menuWrapperOptions: [
+    'blockChannel',
+    'editOptions'
+  ],
+
+  editOptions: {
+    edit: true,
+    delete: true,
+    move: true
   },
 
   // Where to render the inert view
@@ -43,12 +44,11 @@ var MenuWrapper = Marionette.LayoutView.extend({
 
   // Store our options on the object itself
   initialize: function(options) {
-    var validOptions = _.keys(this.defaults)
-    _.extend(this, this.defaults, _.pick(options, validOptions));
+    this.mergeOptions(options, this.menuWrapperOptions);
   },
 
   getInertView: function() {
-    return new this.InertView({
+    return this.blockChannel.request('displayView', {
       model: this.model
     });
   },

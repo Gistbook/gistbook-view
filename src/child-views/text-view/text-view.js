@@ -1,6 +1,6 @@
 /*
  * text-view
- * ---------------
+ * ---------
  * Displays text, first formatted with Markdown, and then Latex.
  *
  */

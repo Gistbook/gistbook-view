@@ -9,19 +9,30 @@
 var AceEditorView = Marionette.ItemView.extend({
   template: gistbookTemplates.aceEditorView,
 
-  // Defaults for the view
-  defaults: {
-    readOnly: false,
-    tabSize: 2,
-    softTabs: true,
-    highlightActiveLine: false,
-    theme: 'tomorrow',
-    mode: 'javascript',
-    minLines: 5,
-    maxLines: 20,
-    hideCursor: false,
-    showGutter: false
-  },
+  // Defaults for the Ace Editor
+  readOnly: false,
+  tabSize: 2,
+  softTabs: true,
+  highlightActiveLine: false,
+  theme: 'tomorrow',
+  mode: 'javascript',
+  minLines: 5,
+  maxLines: 20,
+  hideCursor: false,
+  showGutter: false,
+
+  aceEditorViewOptions: [
+    'readOnly',
+    'tabSize',
+    'softTabs',
+    'highlightActiveLine',
+    'theme',
+    'mode',
+    'minLines',
+    'maxLines',
+    'hideCursor',
+    'showGutter'
+  ],
 
   ui: {
     aceContainer: '.ace-editor'
@@ -29,8 +40,7 @@ var AceEditorView = Marionette.ItemView.extend({
 
   // Merge the options
   initialize: function(options) {
-    var validOptions = _.keys(this.defaults)
-    _.extend(this, this.defaults, _.pick(options, validOptions));
+    this.mergeOptions(options, this.aceEditorViewOptions);
   },
 
   // Create the editor and configure it

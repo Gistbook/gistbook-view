@@ -44,18 +44,6 @@ __p += '<a href=\'#\' class=\'gistblock-move\'><i class=\'fa fa-bars\'></i></a>\
 return __p
 };
 
-this["gistbookTemplates"]["textEditView"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape;
-with (obj) {
-__p +=
-((__t = ( source )) == null ? '' : __t) +
-'\n';
-
-}
-return __p
-};
-
 this["gistbookTemplates"]["gistbookView"] = function(obj) {
 obj || (obj = {});
 var __t, __p = '', __e = _.escape;
@@ -71,37 +59,6 @@ return __p
 (function() {
 
   var Radio = Backbone.Radio;
-
-  /*
-   * radio-shim
-   * ----------
-   * Safely use Backbone.Radio in place of Wreqr.
-   *
-   */
-  
-  Marionette.Application.prototype._initChannel = function () {
-    this.channelName = _.result(this, 'channelName') || 'global';
-    this.channel = _.result(this, 'channel') || Radio.channel(this.channelName);
-  }
-  
-  /*
-   * to-json shim
-   * ------------
-   * Marionette v2.x Views use toJSON for serialization. Tsk tsk.
-   * This fixes that misuse of toJSON.
-   *
-   */
-  
-  
-  Marionette.View.prototype.serializeModel = function(model) {
-    model = model || this.model;
-    return _.clone(model.attributes);
-  };
-  
-  Marionette.ItemView.prototype.serializeCollection = function() {
-    return collection.map(function(model){ return this.serializeModel(model); }, this);
-  };
-  
 
   /*
    * HTML5 Sortable jQuery Plugin
@@ -190,137 +147,61 @@ return __p
   })(jQuery);
   
 
+  // Pick the keys from mergeOptions out of options and
+  // attach them directly to the instance
+  var mergeOptions = function(options, mergeOptions) {
+    _.extend(this, _.pick(options, mergeOptions));
+  };
+  
+  Marionette.View.prototype.mergeOptions = mergeOptions;
+  Marionette.Object.prototype.mergeOptions = mergeOptions;
+  
   /*
-   * gistbook-view
-   * -------------
-   * The publicly exposed view from this library.
-   * It is a composite view that renders the Gistbook.
+   * radio-shim
+   * ----------
+   * Safely use Backbone.Radio in place of Wreqr.
    *
    */
   
-  var GistbookView = Marionette.CompositeView.extend({
+  Marionette.Application.prototype._initChannel = function () {
+    this.channelName = _.result(this, 'channelName') || 'global';
+    this.channel = _.result(this, 'channel') || Radio.channel(this.channelName);
+  }
   
-    // Create our collection from the gistbook's blocks
-    initialize: function(options) {
-      _.bindAll(this, 'resortByDom');
-      var gistblocks = options.model.get('blocks');
-      this.initialRender = false;
-      this.collection = new Backbone.Collection(gistblocks);
-      this.collection.uniqueId = _.uniqueId();
-      this.cacheController = new CacheController({
-        collection: this.collection
-      });
-      this.authorized = Backbone.Radio.request('auth', 'authorized');
-      this.gistbookCh = Backbone.Radio.channel(radioUtil.channelName(this.collection));
-    },
+  /*
+   * to-json shim
+   * ------------
+   * Marionette v2.x Views use toJSON for serialization. Tsk tsk.
+   * This fixes that misuse of toJSON.
+   *
+   */
   
-    // Silently update the collection based on the new DOM indices
-    resortByDom: function() {
-      var newCollection = {};
-      var newArray = [];
-      var index, view;
   
-      this.children.each(function(view, i) {
-        index = this.ui.container.children().index(view.el);
-        newCollection[index] = view.model;
-        newArray = _.sortBy(newCollection, function(key, i) {
-          return i;
-        });
-        view._index = index;
-      }, this);
-      
-      this.collection.reset(newArray, {silent: true});
-    },
+  Marionette.View.prototype.serializeModel = function(model) {
+    model = model || this.model;
+    return _.clone(model.attributes);
+  };
   
-    template: gistbookTemplates.gistbookView,
+  Marionette.ItemView.prototype.serializeCollection = function() {
+    return collection.map(function(model){ return this.serializeModel(model); }, this);
+  };
   
-    ui: {
-      container: '.gistbook-container'
-    },
+  /*
+   * string-util
+   * -----------
+   * Self-explanatory, I guess.
+   *
+   */
   
-    childViewContainer: '.gistbook-container',
+  var stringUtil = {
   
-    // Never used; just here to prevent errors
-    childView: Marionette.ItemView.extend({
-      template: _.template('')
-    }),
-  
-    className: 'gistbook',
-  
-    // Determine the view based on the authorization
-    // and model info
-    getChildView: function(model) {;
-      var viewType = model.get('type');
-      return this['_'+viewType+'View']();
-    },
-  
-    // Make it sortable if we're authorized
-    onRender: function() {
-      this.initialRender = true;
-      this._setUpSortable();
-    },
-  
-    // Shut down sortable before we destroy the view
-    onBeforeDestroy: function() {
-      this.ui.container.sortable('destroy');
-    },
-  
-    _setUpSortable: function() {
-      if (this.authorized) {
-        this.ui.container.sortable({
-          handle: '.gistblock-move'
-        });
-        this.ui.container.on('sortupdate', _.bind(this.resortByDom, this));
-      }
-    },
-    
-    _textView: function() {
-      if (this.authorized) {
-        this.childViewOptions = {
-          InertView: InertTextView
-        };
-        this.childViewOptions.initialMode = this.initialRender ? 'active' : 'inert';
-        return ControlsWrapper;
-      }
-  
-      else {
-        this.childViewOptions = {};
-        return InertTextView.extend({
-          tagName: 'li'
-        });
-      }
-    },
-  
-    _javascriptView: function() {
-      if (this.authorized) {
-        var CustomAceEditor = AceEditorView.extend({
-          className: 'gistblock gistblock-javascript'
-        });
-        this.childViewOptions = {
-          InertView: CustomAceEditor,
-          editOptions: {
-            edit: false,
-            delete: true,
-            move: true
-          }
-        };
-        return ControlsWrapper;
-      }
-  
-      else {
-        this.childViewOptions = {
-          readOnly: true,
-          hideCursor: true,
-          className: 'gistblock gistblock-javascript'
-        };
-        return AceEditorView.extend({
-          tagName: 'li'
-        });
-      }
+    // Capitalize the first letter of a string
+    capitalize: function(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
     }
-  });
   
-
+  };
+  
   /*
    * radio-util
    * ----------
@@ -331,27 +212,31 @@ return __p
   var radioUtil = {
   
     // Generate a unique channel name from a collection or a model
-    channelName: function(entity) {
-      entity = entity instanceof Backbone.Model ? entity.collection : entity;
+    entityChannelName: function(entity) {
       return 'gistbook-' + entity.uniqueId;
+    },
+  
+    // Get the channel from an entity
+    entityChannel: function(entity) {
+      return Radio.channel(radioUtil.entityChannelName(entity));
     }
   };
   
   /*
-   * cache-controller
-   * ----------------
+   * cache-manager
+   * -------------
    * A Gistbook-View works with a cache of a gistbook, so that
    * user's changes aren't updated on the fly. Use the GistbookView API
    * to persist the changes to the original data.
    *
    */
   
-  var CacheController = Marionette.Controller.extend({
+  var CacheManager = Marionette.Object.extend({
   
     initialize: function(options) {
       _.bindAll(this, '_addBlock');
       this.collection = options.collection;
-      this.gistbookCh = Backbone.Radio.channel(radioUtil.channelName(this.collection));
+      this.gistbookCh = radioUtil.entityChannel(this.collection);
       this._configureListeners();
     },
   
@@ -380,6 +265,148 @@ return __p
   
 
   /*
+   * gistbook-view
+   * -------------
+   * The publicly exposed view from this library.
+   * It is a composite view that renders the Gistbook.
+   *
+   */
+  
+  var GistbookView = Marionette.CompositeView.extend({
+    template: gistbookTemplates.gistbookView,
+  
+    ui: {
+      container: '.gistbook-container'
+    },
+  
+    className: 'gistbook',
+  
+    childViewContainer: '.gistbook-container',
+  
+    // Unfortunately, it's never used. It's only here to prevent errors
+    childView: Marionette.ItemView,
+  
+    // Create our collection from the gistbook's blocks
+    initialize: function(options) {
+      _.bindAll(this, '_resortByDom');
+      var gistblocks = options.model.get('blocks');
+      this.initialRender = false;
+      this.collection = new Backbone.Collection(gistblocks);
+      this.collection.uniqueId = _.uniqueId();
+      this.cacheManager = new CacheManager({
+        collection: this.collection
+      });
+      this.authorized = Radio.request('auth', 'authorized');
+      this.gistbookCh = radioUtil.entityChannel(this.collection);
+    },
+  
+    // Determine the view based on the authorization
+    // and model info
+    getChildView: function(model) {;
+      var generatorMethod = this._generatorMethodName(model.get('type'));
+      return this[generatorMethod](model);
+    },
+  
+    // Make it sortable if we're authorized
+    onRender: function() {
+      this.initialRender = true;
+      this._setUpSortable();
+    },
+  
+    // Shut down sortable before we destroy the view
+    onBeforeDestroy: function() {
+      this.ui.container.sortable('destroy');
+    },
+  
+    _generatorMethodName: function(viewType) {
+      return '_get' + stringUtil.capitalize(viewType) + 'View';
+    },
+  
+    _setUpSortable: function() {
+      if (!this.authorized) { return; }
+      
+      this.ui.container.sortable({
+        handle: '.gistblock-move'
+      });
+      this.ui.container.on('sortupdate', _.bind(this._resortByDom, this));
+    },
+    
+    _getTextView: function(model) {
+      if (this.authorized) {
+        this._registerDisplayView(model, InertTextView);
+        var initialMode = this.initialRender ? 'active' : 'inert';
+        this.childViewOptions = {
+          initialMode: initialMode
+        };
+        return ControlsWrapper;
+      }
+  
+      else {
+        this.childViewOptions = {};
+        return InertTextView.extend({
+          tagName: 'li'
+        });
+      }
+    },
+  
+    _getJavascriptView: function(model) {
+      if (this.authorized) {
+        var CustomAceEditor = AceEditorView.extend({
+          className: 'gistblock gistblock-javascript'
+        });
+        this._registerDisplayView(model, CustomAceEditor);
+        this.childViewOptions = {
+          editOptions: {
+            edit: false,
+            move: true,
+            delete: true
+          }
+        };
+        return ControlsWrapper;
+      }
+  
+      else {
+        this.childViewOptions = {
+          readOnly: true,
+          hideCursor: true,
+          className: 'gistblock gistblock-javascript'
+        };
+        return AceEditorView.extend({
+          tagName: 'li'
+        });
+      }
+    },
+  
+    // Register the DisplayView for a particular Gistblock on that block's Channel
+    _registerDisplayView: function(model, ViewClass) {
+      radioUtil.entityChannel(model).reply('displayView', function(options) {
+        return new ViewClass(options);
+      });
+    },
+  
+    // Silently update the collection based on the new DOM indices.
+    // This code is terrible. Marionette needs a better way to
+    // handle manually resorts out-of-the-box.
+    _resortByDom: function() {
+      var newCollection = {};
+      var newArray = [];
+      var index, view;
+  
+      this.children.each(function(view, i) {
+        index = this.ui.container.children().index(view.el);
+        newCollection[index] = view.model;
+        newArray = _.sortBy(newCollection, function(key, i) {
+          return i;
+        });
+        view._index = index;
+      }, this);
+      
+      this.collection.reset(newArray, {silent: true});
+    },
+  });
+  
+  
+  /*
    * ace-editor-view
    * ---------------
    * A view for the ace editor. Used for both
@@ -390,19 +417,30 @@ return __p
   var AceEditorView = Marionette.ItemView.extend({
     template: gistbookTemplates.aceEditorView,
   
-    // Defaults for the view
-    defaults: {
-      readOnly: false,
-      tabSize: 2,
-      softTabs: true,
-      highlightActiveLine: false,
-      theme: 'tomorrow',
-      mode: 'javascript',
-      minLines: 5,
-      maxLines: 20,
-      hideCursor: false,
-      showGutter: false
-    },
+    // Defaults for the Ace Editor
+    readOnly: false,
+    tabSize: 2,
+    softTabs: true,
+    highlightActiveLine: false,
+    theme: 'tomorrow',
+    mode: 'javascript',
+    minLines: 5,
+    maxLines: 20,
+    hideCursor: false,
+    showGutter: false,
+  
+    aceEditorViewOptions: [
+      'readOnly',
+      'tabSize',
+      'softTabs',
+      'highlightActiveLine',
+      'theme',
+      'mode',
+      'minLines',
+      'maxLines',
+      'hideCursor',
+      'showGutter'
+    ],
   
     ui: {
       aceContainer: '.ace-editor'
@@ -410,8 +448,7 @@ return __p
   
     // Merge the options
     initialize: function(options) {
-      var validOptions = _.keys(this.defaults)
-      _.extend(this, this.defaults, _.pick(options, validOptions));
+      this.mergeOptions(options, this.aceEditorViewOptions);
     },
   
     // Create the editor and configure it
@@ -462,7 +499,7 @@ return __p
   
   /*
    * text-view
-   * ---------------
+   * ---------
    * Displays text, first formatted with Markdown, and then Latex.
    *
    */
@@ -514,13 +551,13 @@ return __p
   
   /*
    * text-edit-view
-   * ---------------
+   * --------------
    * Modify text based on a textarea
    *
    */
   
   var TextEditView = Marionette.ItemView.extend({
-    template: gistbookTemplates.textEditView,
+    template: _.template('<%= source %>'),
   
     tagName: 'textarea',
   
@@ -545,14 +582,15 @@ return __p
   
     className: 'gistblock-menu',
   
-    // Default values for options
-    defaults: {
-      InertView: undefined,
-      editOptions: {
-        edit: true,
-        delete: true,
-        move: true
-      }
+    menuWrapperOptions: [
+      'blockChannel',
+      'editOptions'
+    ],
+  
+    editOptions: {
+      edit: true,
+      delete: true,
+      move: true
     },
   
     // Where to render the inert view
@@ -577,12 +615,11 @@ return __p
   
     // Store our options on the object itself
     initialize: function(options) {
-      var validOptions = _.keys(this.defaults)
-      _.extend(this, this.defaults, _.pick(options, validOptions));
+      this.mergeOptions(options, this.menuWrapperOptions);
     },
   
     getInertView: function() {
-      return new this.InertView({
+      return this.blockChannel.request('displayView', {
         model: this.model
       });
     },
@@ -623,14 +660,21 @@ return __p
       // What the tab says that shows the source
       sourceTabText: 'Write',
       PreviewView: undefined,
-      parent: undefined
+      blockChannel: undefined
     },
+  
+    sourceTabText: 'Write',
+  
+    editWrapperOptions: [
+      'sourceTabText',
+      'PreviewView',
+      'blockChannel'
+    ],
   
     // Store our options on the object itself.
     // Also set the initial mode to be code.
     initialize: function(options) {
-      var validOptions = _.keys(this.defaults)
-      _.extend(this, this.defaults, _.pick(options, validOptions));
+      this.mergeOptions(options, this.editWrapperOptions);
   
       this.cache = this.model.toJSON();
   
@@ -666,9 +710,9 @@ return __p
       if (this.mode === 'preview') {
         return;
       }
-      this._updateCache();
+      this._setCache();
       this.transitionUiToPreview();
-      this.parent._updateCache();
+      this.triggerMethod('updateCache');
       this.showPreview();
       this.mode = 'preview';
     },
@@ -688,7 +732,7 @@ return __p
       if (this.mode === 'preview') {
         return;
       }
-      this._updateCache();
+      this._setCache();
     },
   
     transitionUiToPreview: function() {
@@ -708,7 +752,7 @@ return __p
     },
   
     getPreviewView: function() {
-      return new this.PreviewView({
+      return this.blockChannel.request('displayView', {
         model: this.model
       });
     },
@@ -718,12 +762,12 @@ return __p
       var textEditorView = this.getTextEditorView();
       var region = this.getRegion('content');
       region.show(textEditorView);
-      this._updateCache();
+      this._setCache();
     },
   
     // The preview is just an inert math view
     showPreview: function() {
-      this._updateCache();
+      this._setCache();
       var region = this.getRegion('content');
       var previewView = this.getPreviewView();
       region.show(previewView);
@@ -740,8 +784,8 @@ return __p
       this.showEditor();
     },
   
-    // Update the cache from the currentView
-    _updateCache: function() {
+    // Set the cache from the value in the currentView
+    _setCache: function() {
       var region = this.getRegion('content');
       this.cache = region.currentView.value();
     },
@@ -757,7 +801,9 @@ return __p
   /*
    * controls-wrapper
    * ----------------
-   * This is the view wrapper that provides the tools to create a view above the current view.
+   * This is the view wrapper that provides the tools to create a
+   * view above the current view. It also manages data that is
+   * shared between the edit and preview views.
    *
    */
   
@@ -768,15 +814,18 @@ return __p
   
     tagName: 'li',
   
-    defaults: {
-      InertView: undefined,
-      initialMode: 'inert',
-      editOptions: {
-        edit: true,
-        delete: true,
-        move: true
-      }
+    initialMode: 'inert',
+  
+    editOptions: {
+      edit: true,
+      delete: true,
+      move: true
     },
+  
+    controlsWrapperOptions: [
+      'editOptions',
+      'initialMode'
+    ],
   
     regions: {
       wrapper: '.gistblock-wrapper'
@@ -795,8 +844,7 @@ return __p
     // Sets our options, binds callback context, and creates
     // a cached model for users to mess around with
     initialize: function(options) {
-      var validOptions = _.keys(this.defaults)
-      _.extend(this, this.defaults, _.pick(options, validOptions));
+      this.mergeOptions(options, this.controlsWrapperOptions);
   
       _.bindAll(this,
         'onEdit', 'onDelete',
@@ -805,7 +853,7 @@ return __p
       );
   
       this._createCache();
-      this.gistbookCh = Backbone.Radio.channel(radioUtil.channelName(this.model));
+      this.gistbookCh = radioUtil.entityChannel(this.model.collection);
     },
   
     onEdit: function() {
@@ -842,9 +890,8 @@ return __p
   
     showActive: function() {
       this.stopListening();
-      var region = this.getRegion('wrapper');
       var editWrapper = this.getEditWrapper();
-      region.show(editWrapper);
+      this.getRegion('wrapper').show(editWrapper);
       this.currentView = editWrapper;
       this._configureEditListeners();
     },
@@ -865,20 +912,19 @@ return __p
   
     getMenuWrapper: function() {
       return new MenuWrapper({
-        InertView: this.InertView,
         editOptions: this.editOptions,
-        model: this.cachedModel
+        model: this.cachedModel,
+        blockChannel: radioUtil.entityChannel(this.model)
       });
     },
   
     getEditWrapper: function() {
       return new EditWrapper({
-        PreviewView: this.InertView,
         model: this.cachedModel,
+        blockChannel: radioUtil.entityChannel(this.model),
         aceEditorOptions: {
           minLines: 4
-        },
-        parent: this
+        }
       });
     },
   
@@ -903,7 +949,8 @@ return __p
       this.cachedModel.set(this.model.toJSON());
     },
   
-    // Update the cache with the latest content of the text editor
+    // Update the cache with the latest content of the text editor. Only
+    // makes sense to be called when the currentView is the cache
     _updateCache: function() {
       var cachedSource = this.getRegion('wrapper').currentView.cache;
       this.cachedModel.set('source', cachedSource);
@@ -912,6 +959,7 @@ return __p
     _configureEditListeners: function() {
       this.listenTo(this.currentView, 'cancel', this.onCancel);
       this.listenTo(this.currentView, 'update', this.onUpdate);
+      this.listenTo(this.currentView, 'updateCache', this._updateCache);
     },
   
     _configurePreviewListeners: function() {
