@@ -5,18 +5,8 @@ obj || (obj = {});
 var __t, __p = '', __e = _.escape;
 with (obj) {
 __p += '<div class="ace-wrapper">\n  <div class="ace-editor">' +
-((__t = ( source )) == null ? '' : __t) +
+__e( source ) +
 '</div>\n</div>\n';
-
-}
-return __p
-};
-
-this["gistbookTemplates"]["controlsWrapper"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape;
-with (obj) {
-__p += '<div class=\'gistbook-row-controls\'>\n  <hr>\n  <ul>\n    <li>\n      <a href=\'#\' class=\'add-text\'>\n        <span class="fa-stack">\n          <i class="fa fa-circle fa-stack-2x"></i>\n          <i class="fa fa-font fa-stack-1x"></i>\n        </span>\n      </a>\n    </li>\n    <li>\n      <a href=\'#\' class=\'add-javascript\'>\n        <span class="fa-stack">\n          <i class="fa fa-circle fa-stack-2x"></i>\n          <i class="fa fa-code fa-stack-1x"></i>\n        </span>\n      </a>\n    </li>\n  </ul>\n</div>\n<div class=\'gistblock-wrapper\'>\n</div>\n';
 
 }
 return __p
@@ -27,7 +17,7 @@ obj || (obj = {});
 var __t, __p = '', __e = _.escape;
 with (obj) {
 __p += '<h1>\n  ' +
-((__t = ( title )) == null ? '' : __t) +
+__e( title ) +
 '\n</h1>\n<a href=\'#\' class=\'gistbook-title-edit\'>\n  – Edit\n</a>\n';
 
 }
@@ -41,6 +31,16 @@ with (obj) {
 __p += '<input type=\'text\' value=\'' +
 __e( title ) +
 '\'>\n<button>Save</button> or <a href=\'#\'>Cancel</a>\n';
+
+}
+return __p
+};
+
+this["gistbookTemplates"]["controlsWrapper"] = function(obj) {
+obj || (obj = {});
+var __t, __p = '', __e = _.escape;
+with (obj) {
+__p += '<div class=\'gistbook-row-controls\'>\n  <hr>\n  <ul>\n    <li>\n      <a href=\'#\' class=\'add-text\'>\n        <span class="fa-stack">\n          <i class="fa fa-circle fa-stack-2x"></i>\n          <i class="fa fa-font fa-stack-1x"></i>\n        </span>\n      </a>\n    </li>\n    <li>\n      <a href=\'#\' class=\'add-javascript\'>\n        <span class="fa-stack">\n          <i class="fa fa-circle fa-stack-2x"></i>\n          <i class="fa fa-code fa-stack-1x"></i>\n        </span>\n      </a>\n    </li>\n  </ul>\n</div>\n<div class=\'gistblock-wrapper\'>\n</div>\n';
 
 }
 return __p
@@ -537,49 +537,53 @@ return __p
     },
     
     _getTextView: function(model) {
-      if (this.authorized) {
-        this._registerDisplayView(model, DisplayTextView);
-        var initialMode = this.initialRender ? 'edit' : 'display';
-        this.childViewOptions = {
-          initialMode: initialMode
-        };
-        return ControlsWrapper;
-      }
+      return this.authorized ? this._authTextView(model) : this._unauthTextView(model);
+    },
   
-      else {
-        this.childViewOptions = {};
-        return DisplayTextView.extend({
-          tagName: 'li'
-        });
-      }
+    _authTextView: function(model) {
+      this._registerDisplayView(model, DisplayTextView);
+      var initialMode = this.initialRender ? 'edit' : 'display';
+      this.childViewOptions = {
+        initialMode: initialMode
+      };
+      return ControlsWrapper;
+    },
+  
+    _unauthTextView: function(model) {
+      this.childViewOptions = {};
+      return DisplayTextView.extend({
+        tagName: 'li'
+      });
     },
   
     _getJavascriptView: function(model) {
-      if (this.authorized) {
-        var CustomAceEditor = AceEditorView.extend({
-          className: 'gistblock gistblock-javascript'
-        });
-        this._registerDisplayView(model, CustomAceEditor);
-        this.childViewOptions = {
-          editOptions: {
-            edit: false,
-            move: true,
-            delete: true
-          }
-        };
-        return ControlsWrapper;
-      }
+      return this.authorized ? this._authJavascriptView(model) : this._unauthJavascriptView(model);
+    },
   
-      else {
-        this.childViewOptions = {
-          readOnly: true,
-          hideCursor: true,
-          className: 'gistblock gistblock-javascript'
-        };
-        return AceEditorView.extend({
-          tagName: 'li'
-        });
-      }
+    _authJavascriptView: function(model) {
+      var CustomAceEditor = AceEditorView.extend({
+        className: 'gistblock gistblock-javascript'
+      });
+      this._registerDisplayView(model, CustomAceEditor);
+      this.childViewOptions = {
+        editOptions: {
+          edit: false,
+          move: true,
+          delete: true
+        }
+      };
+      return ControlsWrapper;
+    },
+  
+    _unauthJavascriptView: function(model) {
+      this.childViewOptions = {
+        readOnly: true,
+        hideCursor: true,
+        className: 'gistblock gistblock-javascript'
+      };
+      return AceEditorView.extend({
+        tagName: 'li'
+      });
     },
   
     // Register the DisplayView for a particular Gistblock on that block's Channel
@@ -761,7 +765,7 @@ return __p
    */
   
   var EditTextView = Marionette.ItemView.extend({
-    template: _.template('<%= source %>'),
+    template: _.template('<%- source %>'),
   
     tagName: 'textarea',
   

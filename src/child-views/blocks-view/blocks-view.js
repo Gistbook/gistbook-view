@@ -48,49 +48,53 @@ var BlocksView = Marionette.CollectionView.extend({
   },
   
   _getTextView: function(model) {
-    if (this.authorized) {
-      this._registerDisplayView(model, DisplayTextView);
-      var initialMode = this.initialRender ? 'edit' : 'display';
-      this.childViewOptions = {
-        initialMode: initialMode
-      };
-      return ControlsWrapper;
-    }
+    return this.authorized ? this._authTextView(model) : this._unauthTextView(model);
+  },
 
-    else {
-      this.childViewOptions = {};
-      return DisplayTextView.extend({
-        tagName: 'li'
-      });
-    }
+  _authTextView: function(model) {
+    this._registerDisplayView(model, DisplayTextView);
+    var initialMode = this.initialRender ? 'edit' : 'display';
+    this.childViewOptions = {
+      initialMode: initialMode
+    };
+    return ControlsWrapper;
+  },
+
+  _unauthTextView: function(model) {
+    this.childViewOptions = {};
+    return DisplayTextView.extend({
+      tagName: 'li'
+    });
   },
 
   _getJavascriptView: function(model) {
-    if (this.authorized) {
-      var CustomAceEditor = AceEditorView.extend({
-        className: 'gistblock gistblock-javascript'
-      });
-      this._registerDisplayView(model, CustomAceEditor);
-      this.childViewOptions = {
-        editOptions: {
-          edit: false,
-          move: true,
-          delete: true
-        }
-      };
-      return ControlsWrapper;
-    }
+    return this.authorized ? this._authJavascriptView(model) : this._unauthJavascriptView(model);
+  },
 
-    else {
-      this.childViewOptions = {
-        readOnly: true,
-        hideCursor: true,
-        className: 'gistblock gistblock-javascript'
-      };
-      return AceEditorView.extend({
-        tagName: 'li'
-      });
-    }
+  _authJavascriptView: function(model) {
+    var CustomAceEditor = AceEditorView.extend({
+      className: 'gistblock gistblock-javascript'
+    });
+    this._registerDisplayView(model, CustomAceEditor);
+    this.childViewOptions = {
+      editOptions: {
+        edit: false,
+        move: true,
+        delete: true
+      }
+    };
+    return ControlsWrapper;
+  },
+
+  _unauthJavascriptView: function(model) {
+    this.childViewOptions = {
+      readOnly: true,
+      hideCursor: true,
+      className: 'gistblock gistblock-javascript'
+    };
+    return AceEditorView.extend({
+      tagName: 'li'
+    });
   },
 
   // Register the DisplayView for a particular Gistblock on that block's Channel

@@ -24,7 +24,7 @@
   // @include child-views/text/edit/edit-text-view.js
   // @include child-views/wrappers/display/display-wrapper.js
   // @include child-views/wrappers/edit/edit-wrapper.js
-  // @include child-views/controls-wrapper/controls-wrapper.js
+  // @include child-views/wrappers/controls/controls-wrapper.js
 
   window.GistbookView = GistbookView;
 
