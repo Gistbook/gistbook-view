@@ -36,7 +36,7 @@ var EditWrapper = Marionette.LayoutView.extend({
 
     this.cache = this.model.toJSON();
 
-    this.mode = 'code';
+    this.mode = 'write';
   },
 
   serializeData: function() {
@@ -45,10 +45,10 @@ var EditWrapper = Marionette.LayoutView.extend({
     return data;
   },
 
-  // Where to put the InertView, and the 3 menu options
+  // Where to put the view, and the 3 menu options
   ui: {
     content: '.gistblock-content',
-    code:    '.gistblock-code',
+    write:   '.gistblock-write',
     preview: '.gistblock-preview',
     cancel:  '.gistblock-cancel',
     update:  '.gistblock-update'
@@ -56,7 +56,7 @@ var EditWrapper = Marionette.LayoutView.extend({
 
   // Respond to clicks; the parent view is listening
   triggers: {
-    'click @ui.code':    'code',
+    'click @ui.write':   'write',
     'click @ui.preview': 'preview',
     'click @ui.cancel':  'cancel',
     'click @ui.update':  'update'
@@ -75,12 +75,12 @@ var EditWrapper = Marionette.LayoutView.extend({
     this.mode = 'preview';
   },
 
-  onCode: function() {
-    if (this.mode === 'code') {
+  onWrite: function() {
+    if (this.mode === 'write') {
       return;
     }
     this.transitionUiToCode();
-    this.mode = 'code';
+    this.mode = 'write';
     this.showEditor();
   },
 
@@ -94,17 +94,17 @@ var EditWrapper = Marionette.LayoutView.extend({
   },
 
   transitionUiToPreview: function() {
-    this.ui.code.removeClass('active-tab');
+    this.ui.write.removeClass('active-tab');
     this.ui.preview.addClass('active-tab');
   },
 
   transitionUiToCode: function() {
     this.ui.preview.removeClass('active-tab');
-    this.ui.code.addClass('active-tab');
+    this.ui.write.addClass('active-tab');
   },
 
-  getTextEditorView: function() {
-    return new TextEditView({
+  getEditTextView: function() {
+    return new EditTextView({
       model: this.model
     });
   },
@@ -117,7 +117,7 @@ var EditWrapper = Marionette.LayoutView.extend({
 
   // Show the Ace Editor in our region; also set our cache
   showEditor: function() {
-    var textEditorView = this.getTextEditorView();
+    var textEditorView = this.getEditTextView();
     var region = this.getRegion('content');
     region.show(textEditorView);
     this._setCache();

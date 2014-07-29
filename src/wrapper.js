@@ -14,12 +14,16 @@
   // @include resources/cache-manager/cache-manager.js
 
   // @include gistbook-view/gistbook-view.js
+  // @include gistbook-view/managers/title-manager.js
   
+  // @include child-views/title/display/display-title-view.js
+  // @include child-views/title/edit/edit-title-view.js
+  // @include child-views/blocks-view/blocks-view.js
   // @include child-views/ace-editor-view/ace-editor-view.js
-  // @include child-views/text-view/text-view.js
-  // @include child-views/text-edit-view/text-edit-view.js
-  // @include child-views/menu-wrapper/menu-wrapper.js
-  // @include child-views/edit-wrapper/edit-wrapper.js
+  // @include child-views/text/display/display-text-view.js
+  // @include child-views/text/edit/edit-text-view.js
+  // @include child-views/wrappers/display/display-wrapper.js
+  // @include child-views/wrappers/edit/edit-wrapper.js
   // @include child-views/controls-wrapper/controls-wrapper.js
 
   window.GistbookView = GistbookView;

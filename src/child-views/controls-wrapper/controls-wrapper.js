@@ -1,9 +1,10 @@
 /*
  * controls-wrapper
  * ----------------
- * This is the view wrapper that provides the tools to create a
- * view above the current view. It also manages data that is
- * shared between the edit and preview views.
+ * This is the highest-level view wrapper that wraps both
+ * the Display and Edit Wrappers.
+ * It also manages shared cached data between the Display
+ * and Edit modes.
  *
  */
 
@@ -14,7 +15,7 @@ var ControlsWrapper = Marionette.LayoutView.extend({
 
   tagName: 'li',
 
-  initialMode: 'inert',
+  initialMode: 'display',
 
   editOptions: {
     edit: true,
@@ -69,7 +70,7 @@ var ControlsWrapper = Marionette.LayoutView.extend({
   // the saved state. Then, show the preview
   onCancel: function() {
     this._resetCache();
-    this.showInert();
+    this.showDisplay();
   },
 
   onAddText: function() {
@@ -80,11 +81,11 @@ var ControlsWrapper = Marionette.LayoutView.extend({
     this.gistbookCh.trigger('add:block', 'javascript', this.model);
   },
 
-  showInert: function() {
+  showDisplay: function() {
     this.stopListening();
-    var menuWrapper = this.getMenuWrapper();
-    this.getRegion('wrapper').show(menuWrapper);
-    this.currentView = menuWrapper;
+    var displayWrapper = this.getDisplayWrapper();
+    this.getRegion('wrapper').show(displayWrapper);
+    this.currentView = displayWrapper;
     this._configurePreviewListeners();
   },
 
@@ -102,16 +103,16 @@ var ControlsWrapper = Marionette.LayoutView.extend({
   onUpdate: function() {
     this._updateCache();
     this._saveCache();
-    this.showInert();
+    this.showDisplay();
   },
 
-  // Show the edit view with the InertView as the display
+  // Determine which view to show
   onRender: function() {
-    this.initialMode === 'active' ? this.showActive() : this.showInert();
+    this.initialMode === 'edit' ? this.showActive() : this.showDisplay();
   },
 
-  getMenuWrapper: function() {
-    return new MenuWrapper({
+  getDisplayWrapper: function() {
+    return new DisplayWrapper({
       editOptions: this.editOptions,
       model: this.cachedModel,
       blockChannel: radioUtil.entityChannel(this.model)

@@ -22,19 +22,31 @@ __p += '<div class=\'gistbook-row-controls\'>\n  <hr>\n  <ul>\n    <li>\n      <
 return __p
 };
 
-this["gistbookTemplates"]["editWrapper"] = function(obj) {
+this["gistbookTemplates"]["displayTitleView"] = function(obj) {
 obj || (obj = {});
 var __t, __p = '', __e = _.escape;
 with (obj) {
-__p += '<ul>\n  <li><a href=\'#\' class=\'gistblock-code active-tab\'>' +
-((__t = ( sourceTabText )) == null ? '' : __t) +
-'</a></li>\n  <li><a href=\'#\' class=\'gistblock-preview\'>Preview</a></li>\n</ul>\n<div class=\'gistblock-content\'></div>\n<div class=\'button-container\'>\n  <button class=\'gistblock-cancel\'>Cancel</button>\n  <button class=\'gistblock-update blue\'>Update</button>\n</div>\n';
+__p += '<h1>\n  ' +
+((__t = ( title )) == null ? '' : __t) +
+'\n</h1>\n<a href=\'#\' class=\'gistbook-title-edit\'>\n  – Edit\n</a>\n';
 
 }
 return __p
 };
 
-this["gistbookTemplates"]["menuWrapper"] = function(obj) {
+this["gistbookTemplates"]["editTitleView"] = function(obj) {
+obj || (obj = {});
+var __t, __p = '', __e = _.escape;
+with (obj) {
+__p += '<input type=\'text\' value=\'' +
+__e( title ) +
+'\'>\n<button>Save</button> or <a href=\'#\'>Cancel</a>\n';
+
+}
+return __p
+};
+
+this["gistbookTemplates"]["displayWrapper"] = function(obj) {
 obj || (obj = {});
 var __t, __p = '', __e = _.escape;
 with (obj) {
@@ -44,13 +56,23 @@ __p += '<a href=\'#\' class=\'gistblock-move\'><i class=\'fa fa-bars\'></i></a>\
 return __p
 };
 
+this["gistbookTemplates"]["editWrapper"] = function(obj) {
+obj || (obj = {});
+var __t, __p = '', __e = _.escape;
+with (obj) {
+__p += '<ul>\n  <li><a href=\'#\' class=\'gistblock-write active-tab\'>' +
+((__t = ( sourceTabText )) == null ? '' : __t) +
+'</a></li>\n  <li><a href=\'#\' class=\'gistblock-preview\'>Preview</a></li>\n</ul>\n<div class=\'gistblock-content\'></div>\n<div class=\'button-container\'>\n  <button class=\'gistblock-cancel\'>Cancel</button>\n  <button class=\'gistblock-update blue\'>Update</button>\n</div>\n';
+
+}
+return __p
+};
+
 this["gistbookTemplates"]["gistbookView"] = function(obj) {
 obj || (obj = {});
 var __t, __p = '', __e = _.escape;
 with (obj) {
-__p += '<div class=\'gistbook-header\'>\n  <h1>' +
-((__t = ( title )) == null ? '' : __t) +
-'</h1>\n</div>\n<ul class=\'gistbook-container\'>\n</ul>\n';
+__p += '<div class=\'gistbook-header\'></div>\n<ul class=\'gistbook-container\'></ul>\n';
 
 }
 return __p
@@ -211,9 +233,10 @@ return __p
   
   var radioUtil = {
   
-    // Generate a unique channel name from a collection or a model
+    // Generate a unique channel name from an entity
     entityChannelName: function(entity) {
-      return 'gistbook-' + entity.uniqueId;
+      entity._uniqueId = entity._uniqueId || _.uniqueId();
+      return 'gistbook-' + entity._uniqueId;
     },
   
     // Get the channel from an entity
@@ -268,36 +291,217 @@ return __p
    * gistbook-view
    * -------------
    * The publicly exposed view from this library.
-   * It is a composite view that renders the Gistbook.
+   * It is a LayoutView that renders the Gistbook.
    *
    */
   
-  var GistbookView = Marionette.CompositeView.extend({
+  var GistbookView = Marionette.LayoutView.extend({
     template: gistbookTemplates.gistbookView,
   
     ui: {
-      container: '.gistbook-container'
+      container: '.gistbook-container',
+      header: '.gistbook-header'
+    },
+  
+    regions: {
+      blocks: '.gistbook-container',
+      header: '.gistbook-header'
     },
   
     className: 'gistbook',
   
-    childViewContainer: '.gistbook-container',
-  
-    // Unfortunately, it's never used. It's only here to prevent errors
-    childView: Marionette.ItemView,
-  
     // Create our collection from the gistbook's blocks
     initialize: function(options) {
-      _.bindAll(this, '_resortByDom');
-      var gistblocks = options.model.get('blocks');
-      this.initialRender = false;
+      this._createCollection();
+  
+      this.titleManager = new TitleManager({
+        region: this.getRegion('header'),
+        model: this.model
+      });
+    },
+  
+    getBlocksView: function() {
+      return new BlocksView({
+        collection: this.collection
+      });
+    },
+  
+    onRender: function() {
+      this.getRegion('blocks').show(this.getBlocksView());
+      this.titleManager.showDisplayTitleView();
+    },
+  
+    onBeforeDestroy: function() {
+      this.titleManager.destroy();
+  
+      delete this.collection;
+      delete this.titleManager;
+    },
+  
+    _createCollection: function() {
+      var gistblocks = this.model.get('blocks');
       this.collection = new Backbone.Collection(gistblocks);
-      this.collection.uniqueId = _.uniqueId();
+    }
+  });
+  
+  /*
+   * title-manager
+   * -------------
+   * This is the manager for the titles. The Gistbook has the
+   * region, but it doesn't need to manage the going-ons
+   * within that Region. That'd be messy.
+   *
+   */
+  
+  var TitleManager = Marionette.Object.extend({
+    titleManagerOptions: ['region', 'model'],
+  
+    initialize: function(options) {
+      _.bindAll(this, '_editHeader');
+      this.mergeOptions(options, this.titleManagerOptions);
+    },
+  
+    getDisplayTitleView: function() {
+      return new DisplayTitleView({
+        model: this.model,
+        editable: Radio.request('auth', 'authorized')
+      });
+    },
+  
+    getEditTitleView: function() {
+      return new EditTitleView({
+        model: this.model
+      });
+    },
+  
+    showDisplayTitleView: function() {
+      this.stopListening();
+      var displayTitleView = this.getDisplayTitleView();
+      this.region.show(displayTitleView);
+      this._setDisplayListeners(displayTitleView);
+    },
+  
+    showEditTitleView: function() {
+      this.stopListening();
+      var editTitleView = this.getEditTitleView();
+      this.region.show(editTitleView);
+      this._setEditListeners(editTitleView);
+    },
+  
+    _setDisplayListeners: function(displayTitleView) {
+      this.listenToOnce(displayTitleView, 'edit', this._editHeader);
+    },
+  
+    _setEditListeners: function(editTitleView) {
+      this.listenToOnce(editTitleView, 'save', this._displayHeader);
+      this.listenToOnce(editTitleView, 'cancel', this._displayHeader);
+    },
+  
+    _editHeader: function() {
+      this.showEditTitleView();
+    },
+  
+    _displayHeader: function() {
+      this.showDisplayTitleView();
+    },
+  
+    onBeforeDestroy: function() {
+      delete this.region;
+      delete this.model;
+    }
+  });
+  
+  
+  /*
+   * display-title-view
+   * ------------------
+   * The display view for the title.
+   *
+   */
+  
+  var DisplayTitleView = Marionette.ItemView.extend({
+    template: gistbookTemplates.displayTitleView,
+  
+    className: 'display-title-view',
+  
+    ui: {
+      edit: '.gistbook-title-edit'
+    },
+  
+    triggers: {
+      'click @ui.edit': 'edit'
+    },
+  
+    editable: false,
+  
+    displayTitleViewOptions: ['editable'],
+  
+    initialize: function(options) {
+      this.mergeOptions(options, this.displayTitleViewOptions);
+      this._setClass();
+    },
+  
+    // Sets whether the view is editable or not.
+    _setClass: function() {
+      this.$el.toggleClass('editable', this.editable);
+    }
+  });
+  
+  /*
+   * edit-header-view
+   * ----------------
+   * The edit view for the title.
+   *
+   */
+  
+  var EditTitleView = Marionette.ItemView.extend({
+    template: gistbookTemplates.editTitleView,
+  
+    className: 'edit-title-view',
+  
+    ui: {
+      input: 'input',
+      save: 'button',
+      cancel: 'a'
+    },
+  
+    events: {
+      'keypress input': 'onKeypress'
+    },
+  
+    triggers: {
+      'click @ui.save': 'save',
+      'click @ui.cancel': 'cancel'
+    },
+  
+    onSave: function() {
+      var newTitle = this.ui.input.val();
+      this.model.set('title', newTitle);
+    },
+  
+    onKeypress: function(e) {
+      if (e.keyCode !== 13) {
+        return;
+      }
+      this.triggerMethod('save');
+    }
+  });
+  
+  /*
+   * blocks-view
+   * -----------
+   * Renders gistblocks
+   *
+   */
+  
+  var BlocksView = Marionette.CollectionView.extend({
+    initialize: function() {
+      _.bindAll(this, '_resortByDom');
+      this.initialRender = false;
       this.cacheManager = new CacheManager({
         collection: this.collection
       });
       this.authorized = Radio.request('auth', 'authorized');
-      this.gistbookCh = radioUtil.entityChannel(this.collection);
     },
   
     // Determine the view based on the authorization
@@ -315,7 +519,7 @@ return __p
   
     // Shut down sortable before we destroy the view
     onBeforeDestroy: function() {
-      this.ui.container.sortable('destroy');
+      this.$el.sortable('destroy');
     },
   
     _generatorMethodName: function(viewType) {
@@ -325,16 +529,17 @@ return __p
     _setUpSortable: function() {
       if (!this.authorized) { return; }
       
-      this.ui.container.sortable({
+      this.$el.sortable({
         handle: '.gistblock-move'
       });
-      this.ui.container.on('sortupdate', _.bind(this._resortByDom, this));
+  
+      this.$el.on('sortupdate', this._resortByDom);
     },
     
     _getTextView: function(model) {
       if (this.authorized) {
-        this._registerDisplayView(model, InertTextView);
-        var initialMode = this.initialRender ? 'active' : 'inert';
+        this._registerDisplayView(model, DisplayTextView);
+        var initialMode = this.initialRender ? 'edit' : 'display';
         this.childViewOptions = {
           initialMode: initialMode
         };
@@ -343,7 +548,7 @@ return __p
   
       else {
         this.childViewOptions = {};
-        return InertTextView.extend({
+        return DisplayTextView.extend({
           tagName: 'li'
         });
       }
@@ -393,7 +598,7 @@ return __p
       var index, view;
   
       this.children.each(function(view, i) {
-        index = this.ui.container.children().index(view.el);
+        index = this.$el.children().index(view.el);
         newCollection[index] = view.model;
         newArray = _.sortBy(newCollection, function(key, i) {
           return i;
@@ -402,15 +607,14 @@ return __p
       }, this);
       
       this.collection.reset(newArray, {silent: true});
-    },
+    }
   });
-  
   
   /*
    * ace-editor-view
    * ---------------
    * A view for the ace editor. Used for both
-   * inert and active views.
+   * display and edit views.
    *
    */
   
@@ -504,7 +708,7 @@ return __p
    *
    */
   
-  var InertTextView = Marionette.ItemView.extend({
+  var DisplayTextView = Marionette.ItemView.extend({
   
     // This doesn't need a template, as we're rendering the HTML through
     // Mathjax and Marked. Once Marionette supports template: false; we should
@@ -556,7 +760,7 @@ return __p
    *
    */
   
-  var TextEditView = Marionette.ItemView.extend({
+  var EditTextView = Marionette.ItemView.extend({
     template: _.template('<%= source %>'),
   
     tagName: 'textarea',
@@ -570,15 +774,15 @@ return __p
   });
   
   /*
-   * menu-wrapper
-   * ------------
-   * A wrapper for an Inert View;
-   * It provides controls for editing
+   * display-wrapper
+   * ---------------
+   * A wrapper for display views that provide the controls
+   * to edit the view
    *
    */
   
-  var MenuWrapper = Marionette.LayoutView.extend({
-    template: gistbookTemplates.menuWrapper,
+  var DisplayWrapper = Marionette.LayoutView.extend({
+    template: gistbookTemplates.displayWrapper,
   
     className: 'gistblock-menu',
   
@@ -593,12 +797,12 @@ return __p
       move: true
     },
   
-    // Where to render the inert view
+    // Where to render the view
     regions: {
       content: '.gistblock-content'
     },
   
-    // Where to put the InertView, and the 3 menu options
+    // Where to put the view, and the 3 menu options
     ui: {
       content: '.gistblock-content',
       edit: '.gistblock-edit',
@@ -618,7 +822,7 @@ return __p
       this.mergeOptions(options, this.menuWrapperOptions);
     },
   
-    getInertView: function() {
+    getDisplayView: function() {
       return this.blockChannel.request('displayView', {
         model: this.model
       });
@@ -628,8 +832,8 @@ return __p
     onRender: function() {
       this._showMenu();
       var region = this.getRegion('content');
-      var inertView = this.getInertView();
-      region.show(inertView);
+      var displayView = this.getDisplayView();
+      region.show(displayView);
     },
   
     // Show or hide each menu item based on options
@@ -678,7 +882,7 @@ return __p
   
       this.cache = this.model.toJSON();
   
-      this.mode = 'code';
+      this.mode = 'write';
     },
   
     serializeData: function() {
@@ -687,10 +891,10 @@ return __p
       return data;
     },
   
-    // Where to put the InertView, and the 3 menu options
+    // Where to put the view, and the 3 menu options
     ui: {
       content: '.gistblock-content',
-      code:    '.gistblock-code',
+      write:   '.gistblock-write',
       preview: '.gistblock-preview',
       cancel:  '.gistblock-cancel',
       update:  '.gistblock-update'
@@ -698,7 +902,7 @@ return __p
   
     // Respond to clicks; the parent view is listening
     triggers: {
-      'click @ui.code':    'code',
+      'click @ui.write':   'write',
       'click @ui.preview': 'preview',
       'click @ui.cancel':  'cancel',
       'click @ui.update':  'update'
@@ -717,12 +921,12 @@ return __p
       this.mode = 'preview';
     },
   
-    onCode: function() {
-      if (this.mode === 'code') {
+    onWrite: function() {
+      if (this.mode === 'write') {
         return;
       }
       this.transitionUiToCode();
-      this.mode = 'code';
+      this.mode = 'write';
       this.showEditor();
     },
   
@@ -736,17 +940,17 @@ return __p
     },
   
     transitionUiToPreview: function() {
-      this.ui.code.removeClass('active-tab');
+      this.ui.write.removeClass('active-tab');
       this.ui.preview.addClass('active-tab');
     },
   
     transitionUiToCode: function() {
       this.ui.preview.removeClass('active-tab');
-      this.ui.code.addClass('active-tab');
+      this.ui.write.addClass('active-tab');
     },
   
-    getTextEditorView: function() {
-      return new TextEditView({
+    getEditTextView: function() {
+      return new EditTextView({
         model: this.model
       });
     },
@@ -759,7 +963,7 @@ return __p
   
     // Show the Ace Editor in our region; also set our cache
     showEditor: function() {
-      var textEditorView = this.getTextEditorView();
+      var textEditorView = this.getEditTextView();
       var region = this.getRegion('content');
       region.show(textEditorView);
       this._setCache();
@@ -801,9 +1005,10 @@ return __p
   /*
    * controls-wrapper
    * ----------------
-   * This is the view wrapper that provides the tools to create a
-   * view above the current view. It also manages data that is
-   * shared between the edit and preview views.
+   * This is the highest-level view wrapper that wraps both
+   * the Display and Edit Wrappers.
+   * It also manages shared cached data between the Display
+   * and Edit modes.
    *
    */
   
@@ -814,7 +1019,7 @@ return __p
   
     tagName: 'li',
   
-    initialMode: 'inert',
+    initialMode: 'display',
   
     editOptions: {
       edit: true,
@@ -869,7 +1074,7 @@ return __p
     // the saved state. Then, show the preview
     onCancel: function() {
       this._resetCache();
-      this.showInert();
+      this.showDisplay();
     },
   
     onAddText: function() {
@@ -880,11 +1085,11 @@ return __p
       this.gistbookCh.trigger('add:block', 'javascript', this.model);
     },
   
-    showInert: function() {
+    showDisplay: function() {
       this.stopListening();
-      var menuWrapper = this.getMenuWrapper();
-      this.getRegion('wrapper').show(menuWrapper);
-      this.currentView = menuWrapper;
+      var displayWrapper = this.getDisplayWrapper();
+      this.getRegion('wrapper').show(displayWrapper);
+      this.currentView = displayWrapper;
       this._configurePreviewListeners();
     },
   
@@ -902,16 +1107,16 @@ return __p
     onUpdate: function() {
       this._updateCache();
       this._saveCache();
-      this.showInert();
+      this.showDisplay();
     },
   
-    // Show the edit view with the InertView as the display
+    // Determine which view to show
     onRender: function() {
-      this.initialMode === 'active' ? this.showActive() : this.showInert();
+      this.initialMode === 'edit' ? this.showActive() : this.showDisplay();
     },
   
-    getMenuWrapper: function() {
-      return new MenuWrapper({
+    getDisplayWrapper: function() {
+      return new DisplayWrapper({
         editOptions: this.editOptions,
         model: this.cachedModel,
         blockChannel: radioUtil.entityChannel(this.model)

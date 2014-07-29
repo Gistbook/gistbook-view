@@ -1,9 +1,7 @@
 // An example file uses the compiler
 (function() {
 
-  Backbone.Radio.reply('auth', 'authorized', function() {
-    return true;
-  });
+  Backbone.Radio.reply('auth', 'authorized', true);
 
   // Set up a region to display the Gistbook within
   var region = new Marionette.Region({

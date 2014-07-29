@@ -7,9 +7,10 @@
 
 var radioUtil = {
 
-  // Generate a unique channel name from a collection or a model
+  // Generate a unique channel name from an entity
   entityChannelName: function(entity) {
-    return 'gistbook-' + entity.uniqueId;
+    entity._uniqueId = entity._uniqueId || _.uniqueId();
+    return 'gistbook-' + entity._uniqueId;
   },
 
   // Get the channel from an entity

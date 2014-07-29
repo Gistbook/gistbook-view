@@ -5,7 +5,7 @@
  *
  */
 
-var InertTextView = Marionette.ItemView.extend({
+var DisplayTextView = Marionette.ItemView.extend({
 
   // This doesn't need a template, as we're rendering the HTML through
   // Mathjax and Marked. Once Marionette supports template: false; we should

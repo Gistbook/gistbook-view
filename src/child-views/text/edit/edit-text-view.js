@@ -5,7 +5,7 @@
  *
  */
 
-var TextEditView = Marionette.ItemView.extend({
+var EditTextView = Marionette.ItemView.extend({
   template: _.template('<%= source %>'),
 
   tagName: 'textarea',

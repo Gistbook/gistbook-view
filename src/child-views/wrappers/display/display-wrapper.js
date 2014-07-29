@@ -1,13 +1,13 @@
 /*
- * menu-wrapper
- * ------------
- * A wrapper for an Inert View;
- * It provides controls for editing
+ * display-wrapper
+ * ---------------
+ * A wrapper for display views that provide the controls
+ * to edit the view
  *
  */
 
-var MenuWrapper = Marionette.LayoutView.extend({
-  template: gistbookTemplates.menuWrapper,
+var DisplayWrapper = Marionette.LayoutView.extend({
+  template: gistbookTemplates.displayWrapper,
 
   className: 'gistblock-menu',
 
@@ -22,12 +22,12 @@ var MenuWrapper = Marionette.LayoutView.extend({
     move: true
   },
 
-  // Where to render the inert view
+  // Where to render the view
   regions: {
     content: '.gistblock-content'
   },
 
-  // Where to put the InertView, and the 3 menu options
+  // Where to put the view, and the 3 menu options
   ui: {
     content: '.gistblock-content',
     edit: '.gistblock-edit',
@@ -47,7 +47,7 @@ var MenuWrapper = Marionette.LayoutView.extend({
     this.mergeOptions(options, this.menuWrapperOptions);
   },
 
-  getInertView: function() {
+  getDisplayView: function() {
     return this.blockChannel.request('displayView', {
       model: this.model
     });
@@ -57,8 +57,8 @@ var MenuWrapper = Marionette.LayoutView.extend({
   onRender: function() {
     this._showMenu();
     var region = this.getRegion('content');
-    var inertView = this.getInertView();
-    region.show(inertView);
+    var displayView = this.getDisplayView();
+    region.show(displayView);
   },
 
   // Show or hide each menu item based on options

@@ -2,7 +2,7 @@
  * ace-editor-view
  * ---------------
  * A view for the ace editor. Used for both
- * inert and active views.
+ * display and edit views.
  *
  */
 
